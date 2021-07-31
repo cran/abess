@@ -8,7 +8,10 @@
 #' @useDynLib abess, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
 #' @importFrom MASS mvrnorm
+#' @importFrom MASS cov.rob
 #' @importFrom stats runif
+#' @importFrom stats cov
+#' @importFrom stats cor
 #' @importFrom stats rnorm
 #' @importFrom stats rbinom
 #' @importFrom stats rpois
@@ -19,6 +22,7 @@
 #' @importFrom stats model.frame
 #' @importFrom stats model.response
 #' @importFrom methods rbind2
+#' @import Matrix
 #' @importFrom Matrix Matrix
 #' @importFrom Matrix rowSums
 ## usethis namespace: end

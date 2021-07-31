@@ -2,7 +2,7 @@
 % Please edit documentation in R/print.abess.R
 \name{print.abess}
 \alias{print.abess}
-\title{Print method for a fitted "abess" object}
+\title{Print method for a fitted "\code{abess}" object}
 \usage{
 \method{print}{abess}(x, digits = max(5, getOption("digits") - 5), ...)
 }

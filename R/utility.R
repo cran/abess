@@ -29,8 +29,8 @@
 #' by the variance of a gaussian noise: \eqn{\frac{Var(x\beta)}{\sigma^2}}.
 #' The gaussian noise \eqn{\epsilon} is set with mean 0 and variance.
 #' The noise is added to the linear predictor \eqn{\eta} = \eqn{x\beta}. Default is \code{snr = 10}.
-# This option is invalid for \code{cortype = 3}.
-# @param censoring Whether data is censored or not. Valid only for \code{family = "cox"}. Default is \code{TRUE}.
+#' Note that this arguments's effect is overridden if \code{sigma} is supplied with a non-null value. 
+#' @param sigma The variance of the gaussian noise. Default \code{sigma = NULL} implies it is determined by \code{snr}.
 #' @param weibull.shape The shape parameter of the Weibull distribution. 
 #' It works only when \code{family = "cox"}. 
 #' Default: \code{weibull.shape = 1}.
@@ -63,7 +63,7 @@
 # to the \eqn{\sqrt n} length. Then the design matrix \eqn{X} is generated with
 # \eqn{X_j = \bar{X}_j + \rho(\bar{X}_{j+1}+\bar{X}_{j-1})} for \eqn{j=2,\dots,p-1}.
 #'
-#' For \code{family = "gaussian"} , the data model is 
+#' For \code{family = "gaussian"}, the data model is 
 #' \deqn{Y = X \beta + \epsilon.}
 #' The underlying regression coefficient \eqn{\beta} has 
 #' uniform distribution [m, 100m] and \eqn{m=5 \sqrt{2log(p)/n}.}
@@ -90,8 +90,17 @@
 #' uniform distribution [2m, 10m], 
 #' where \eqn{m = 5 \sqrt{2log(p)/n}}.
 #' 
-#' In the above models, \eqn{\epsilon \sim N(0,
-#' \sigma^2 ),} where \eqn{\sigma^2} is determined by the \code{snr}.
+#' For \code{family = "mgaussian"}, the data model is 
+#' \deqn{Y = X \beta + E.}
+#' The non-zero values of regression matrix \eqn{\beta} are sampled from
+#' uniform distribution [m, 100m] and \eqn{m=5 \sqrt{2log(p)/n}.} 
+#' 
+#' For \code{family= "multinomial"}, the data model is \deqn{Prob(Y = 1) = \exp(X \beta + E)/(1 + \exp(X \beta + E)).}
+#' The non-zero values of regression coefficient \eqn{\beta} has 
+#' uniform distribution [2m, 10m] and \eqn{m = 5 \sqrt{2log(p)/n}.}
+#' 
+#' In the above models, \eqn{\epsilon \sim N(0, \sigma^2 )} and \eqn{E \sim MVN(0, \sigma^2 \times I_{q \times q})}, 
+#' where \eqn{\sigma^2} is determined by the \code{snr} and q is \code{y.dim}.
 #' 
 #' @author Jin Zhu
 #' 
@@ -114,13 +123,14 @@ generate.data <- function(n,
                           beta = NULL,
                           cortype = 1,
                           snr = 10,
+                          sigma = NULL,
                           weibull.shape = 1,
                           uniform.max = 1, 
                           y.dim = 3, 
                           class.num = 3, 
                           seed = 1) 
 {
-  sigma <- 1
+  # sigma <- 1
   
   family <- match.arg(family)
   if (family == "mgaussian") {
@@ -195,7 +205,9 @@ generate.data <- function(n,
     } else {
       beta <- input_beta
     }
-    sigma <- sqrt((t(beta) %*% Sigma %*% beta) / snr)
+    if(is.null(sigma)){
+      sigma <- sqrt((t(beta) %*% Sigma %*% beta) / snr)
+    }
     
     y <- x %*% beta + rnorm(n, 0, sigma)
   } 
@@ -206,7 +218,9 @@ generate.data <- function(n,
     } else {
       beta <- input_beta
     }
-    sigma <- sqrt((t(beta) %*% Sigma %*% beta) / snr)
+    if(is.null(sigma)){
+      sigma <- sqrt((t(beta) %*% Sigma %*% beta) / snr)
+    }
     
     eta <- x %*% beta + rnorm(n, 0, sigma)
     PB <- apply(eta, 1, generatedata2)
@@ -219,7 +233,9 @@ generate.data <- function(n,
     } else {
       beta <- input_beta
     }
-    sigma <- sqrt((t(beta) %*% Sigma %*% beta) / snr)
+    if(is.null(sigma)){
+      sigma <- sqrt((t(beta) %*% Sigma %*% beta) / snr)
+    }
     
     eta <- x %*% beta + rnorm(n, 0, sigma)
     time <- (-log(stats::runif(n)) / drop(exp(eta))) ^ (1 / weibull.shape)
@@ -239,7 +255,10 @@ generate.data <- function(n,
     } else {
       beta <- input_beta
     }
-    sigma <- sqrt((t(beta) %*% Sigma %*% beta) / snr)
+    if(is.null(sigma)){
+      sigma <- sqrt((t(beta) %*% Sigma %*% beta) / snr)
+    }
+    
     sigma <- 0
     eta <- x %*% beta + stats::rnorm(n, 0, sigma)
     eta <- ifelse(eta > 30, 30, eta)
@@ -259,7 +278,9 @@ generate.data <- function(n,
     } else {
       beta <- input_beta
     }
-    sigma <- sqrt((t(beta) %*% Sigma %*% beta) / snr)
+    if(is.null(sigma)){
+      sigma <- sqrt((t(beta) %*% Sigma %*% beta) / snr)
+    }
     sigma <- diag(sigma)
     sigma <- sigma * y_cor
     epsilon <- MASS::mvrnorm(n = n, mu = rep(0, y_dim), Sigma = sigma)
@@ -275,7 +296,9 @@ generate.data <- function(n,
     } else {
       beta <- input_beta
     }
-    sigma <- sqrt((t(beta) %*% Sigma %*% beta) / snr)
+    if(is.null(sigma)){
+      sigma <- sqrt((t(beta) %*% Sigma %*% beta) / snr)
+    }
     sigma <- diag(sigma)
     sigma <- sigma * y_cor
     epsilon <- MASS::mvrnorm(n, rep(0, y_dim), sigma)
@@ -300,37 +323,24 @@ generatedata2 <- function(eta) {
   return(a)
 }
 
-# #' Title
-# #' @description recover beta after feature screening
-# #' @note run this function 
-# #' before \code{object[["screening_A"]]} is removed.
-# #' @noRd
-# recover_beta <- function(object) {
-#   if (length(object[["screening_A"]]) != 0) {
-#     beta_all <- matrix(0, nrow = object[["nvars"]], 
-#                        ncol = length(object[["support.size"]]))
-#     beta_all[object[["screening_A"]] + 1, ] <- object[["beta"]]
-#     object[["beta"]] <- beta_all
-#   }
-# }
-
-
-list.beta <- function(beta.mat, object, sparse) {
-  beta.all <- matrix(0, nrow = length(object[["best.model"]][["beta"]]), 
-                     ncol = ncol(beta.mat))
-  beta.all[object[["screening.index"]], ] = beta.mat[[1]]
-  if (sparse) {
-    beta.all <- Matrix::Matrix(beta.all)
-  }
-  return(beta.all)
-}
-
 match_support_size <- function(object, support.size) {
   supp_size_index <- match(support.size, object[["support.size"]])
   if (anyNA(supp_size_index)) {
     stop("Arugments support.size comprises support sizes that are not in the abess object.")
   }
   supp_size_index
+}
+
+check_integer <- function(x, message) {
+  if (any(x %% 1 != 0)) {
+    stop(message)
+  }
+}
+
+check_integer_warning <- function(x, message) {
+  if (any(x %% 1 != 0)) {
+    warning(message)
+  }
 }
 
 abess_model_matrix <- function(object, data = environment(object), 
@@ -364,13 +374,9 @@ abess_model_matrix <- function(object, data = environment(object),
     
     for (i in namD) {
       if (is.character(data[[i]])) {
-        stop("Some columns in data are character! 
-             You may convert these columns to a dummy variable via 
-             model.matrix function or discard them.")
+        stop("Some columns in data are character! You may convert these columns to a dummy variable via model.matrix function or discard them.")
       } else if (is.factor(data[[i]])) {
-        stop("Some columns in data are factor!. 
-        You may convert these columns to a dummy variable via 
-             model.matrix function or discard them.")
+        stop("Some columns in data are factor!. You may convert these columns to a dummy variable via model.matrix function or discard them.")
       }
     }
   }

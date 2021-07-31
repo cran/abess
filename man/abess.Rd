@@ -12,12 +12,15 @@
   family = c("gaussian", "binomial", "poisson", "cox", "mgaussian", "multinomial"),
   tune.path = c("sequence", "gsection"),
   tune.type = c("gic", "ebic", "bic", "aic", "cv"),
-  weight = rep(1, nrow(x)),
+  weight = NULL,
   normalize = NULL,
   c.max = 2,
   support.size = NULL,
   gs.range = NULL,
+  lambda = 0,
   always.include = NULL,
+  group.index = NULL,
+  splicing.type = 2,
   max.splicing.iter = 20,
   screening.num = NULL,
   warm.start = TRUE,
@@ -36,12 +39,15 @@
 }
 \arguments{
 \item{x}{Input matrix, of dimension \eqn{n \times p}; each row is an observation
-vector and each column is a predictor/feature/variable.}
+vector and each column is a predictor/feature/variable. 
+Can be in sparse matrix format (inherit from class \code{"dgCMatrix"} in package \code{Matrix}).}
 
 \item{y}{The response variable, of \code{n} observations. 
 For \code{family = "binomial"} should have two levels. 
 For \code{family="poisson"}, \code{y} should be a vector with positive integer. 
-For \code{family = "cox"}, \code{y} should be a two-column matrix with columns named \code{time} and \code{status}.
+For \code{family = "cox"}, \code{y} should be a \code{Surv} object returned 
+by the \code{survival} package (recommended) or 
+a two-column matrix with columns named \code{"time"} and \code{"status"}.
 For \code{family = "mgaussian"}, \code{y} should be a matrix of quantitative responses.
 For \code{family = "multinomial"}, \code{y} should be a factor of at least three levels.
 Note that, for either \code{"binomial"} or \code{"multinomial"}, 
@@ -56,15 +62,16 @@ if y is presented as a numerical vector, it will be coerced into a factor.}
 Depending on the response. Any unambiguous substring can be given.}
 
 \item{tune.path}{The method to be used to select the optimal support size. For
-\code{method = "sequence"}, we solve the best subset selection problem for each size in \code{support.size}.
-For \code{method = "gsection"}, we solve the best subset selection problem with support size ranged in \code{gs.range},
+\code{tune.path = "sequence"}, we solve the best subset selection problem for each size in \code{support.size}.
+For \code{tune.path = "gsection"}, we solve the best subset selection problem with support size ranged in \code{gs.range},
 where the specific support size to be considered is determined by golden section.}
 
 \item{tune.type}{The type of criterion for choosing the support size. 
 Available options are \code{"gic"}, \code{"ebic"}, \code{"bic"}, \code{"aic"} and \code{"cv"}.
 Default is \code{"gic"}.}
 
-\item{weight}{Observation weights. Default is \code{1} for each observation.}
+\item{weight}{Observation weights. When \code{weight = NULL}, 
+we set \code{weight = 1} for each observation as default.}
 
 \item{normalize}{Options for normalization. \code{normalize = 0} for no normalization. 
 \code{normalize = 1} for subtracting the mean of columns of \code{x}.
@@ -77,14 +84,29 @@ If \code{normalize = NULL}, \code{normalize} will be set \code{1} for \code{"gau
 \item{c.max}{an integer splicing size. Default is: \code{c.max = 2}.}
 
 \item{support.size}{An integer vector representing the alternative support sizes. 
-Only used for \code{method = "sequence"}. Default is \code{0:min(n, round(n/(log(log(n))log(p))))}.}
+Only used for \code{tune.path = "sequence"}. Default is \code{0:min(n, round(n/(log(log(n))log(p))))}.}
 
 \item{gs.range}{A integer vector with two elements. 
 The first element is the minimum model size considered by golden-section, 
 the later one is the maximum one. Default is \code{gs.range = c(1, min(n, round(n/(log(log(n))log(p)))))}.
 Not available now.}
 
+\item{lambda}{A single lambda value for regularized best subset selection. Default is 0.}
+
 \item{always.include}{An integer vector containing the indexes of variables that should always be included in the model.}
+
+\item{group.index}{A vector of integers indicating the which group each variable is in.
+For variables in the same group, they should be located in adjacent columns of \code{x}
+and their corresponding index in \code{group.index} should be the same.
+Denote the first group as \code{1}, the second \code{2}, etc.
+If you do not fit a model with a group structure,
+please set \code{group.index = NULL} (the default).}
+
+\item{splicing.type}{Optional type for splicing. 
+If \code{splicing.type = 1}, the number of variables to be spliced is 
+\code{c.max}, ..., \code{1}; if \code{splicing.type = 2}, 
+the number of variables to be spliced is \code{c.max}, \code{c.max/2}, ..., \code{1}.
+(Default: \code{splicing.type = 2}.)}
 
 \item{max.splicing.iter}{The maximum number of performing splicing algorithm. 
 In most of the case, only a few times of splicing iteration can guarantee the convergence. 
@@ -95,12 +117,7 @@ marginal maximum likelihood estimator before running algorithm.}
 
 \item{warm.start}{Whether to use the last solution as a warm start. Default is \code{warm.start = TRUE}.}
 
-\item{nfolds}{The number of folds in cross-validation. Default is \code{nfolds = 5}.
-For variables in the same group, they should be located in adjacent columns of \code{x}
-and their corresponding index in \code{group.index} should be the same.
-Denote the first group as \code{1}, the second \code{2}, etc.
-If you do not fit a model with a group structure,
-please set \code{group.index = NULL}. Default is \code{NULL}.}
+\item{nfolds}{The number of folds in cross-validation. Default is \code{nfolds = 5}.}
 
 \item{cov.update}{A logical value only used for \code{family = "gaussian"}. If \code{cov.update = TRUE}, 
 use a covariance-based implementation; otherwise, a naive implementation. 
@@ -158,20 +175,22 @@ while a list of \code{length(support.size)} intercept vector (with size \code{nc
 \item{family}{Type of the model.}
 \item{tune.path}{The path type for tuning parameters.}
 \item{support.size}{The actual \code{support.size} values used. 
-Note that it is not necessary the same as the input 
+Note that it is not necessary the same as the input  
 if the later have non-integer values or duplicated values.}
+\item{edf}{The effective degree of freedom. 
+It is the same as \code{support.size} when \code{lambda = 0}.}
 \item{best.size}{The best support size selected by the tuning value.} 
 \item{tune.type}{The criterion type for tuning parameters.}
 \item{tune.path}{The strategy for tuning parameters.}
 \item{screening.vars}{The character vector specify the feature 
 selected by feature screening. 
-It would a empty character vector if \code{screening.num = 0}.}
+It would be an empty character vector if \code{screening.num = 0}.}
 \item{call}{The original call to \code{abess}.}
 }
 \description{
 Adaptive best-subset selection for regression, 
-classification, counting-response, censored-response, multi-response modeling 
-in polynomial times.
+(multi-class) classification, counting-response, censored-response, 
+multi-response modeling in polynomial times.
 }
 \details{
 Best-subset selection aims to find a small subset of predictors, 
@@ -191,6 +210,7 @@ we provide various criterion like GIC, AIC, BIC and cross-validation error to de
 }
 \examples{
 \donttest{
+library(abess)
 n <- 100
 p <- 20
 support.size <- 3
@@ -238,11 +258,31 @@ abess_fit <- abess(dataset[["x"]], dataset[["y"]],
 predict(abess_fit, newx = dataset[["x"]][1:10, ], 
         support.size = c(3, 4), type = "response")
 
+########## Best group subset selection #############
+dataset <- generate.data(n, p, support.size)
+group_index <- rep(1:10, each = 2)
+abess_fit <- abess(dataset[["x"]], dataset[["y"]], group.index = group_index)
+str(extract(abess_fit))
+
+################ Golden section searching ################
+dataset <- generate.data(n, p, support.size)
+abess_fit <- abess(dataset[["x"]], dataset[["y"]], tune.path = "gsection")
+abess_fit
+
 ################ Feature screening ################
 p <- 1000
 dataset <- generate.data(n, p, support.size)
 abess_fit <- abess(dataset[["x"]], dataset[["y"]], 
                    screening.num = 100)
+str(extract(abess_fit))
+
+################ Sparse predictor ################
+require(Matrix)
+p <- 1000
+dataset <- generate.data(n, p, support.size)
+dataset[["x"]][abs(dataset[["x"]]) < 1] <- 0
+dataset[["x"]] <- Matrix(dataset[["x"]])
+abess_fit <- abess(dataset[["x"]], dataset[["y"]])
 str(extract(abess_fit))
 }
 \donttest{
@@ -258,6 +298,8 @@ A polynomial algorithm for best-subset selection problem. Junxian Zhu, Canhong W
 Sure independence screening for ultrahigh dimensional feature space. Fan, J. and Lv, J. (2008), Journal of the Royal Statistical Society: Series B (Statistical Methodology), 70: 849-911. https://doi.org/10.1111/j.1467-9868.2008.00674.x
 
 Targeted Inference Involving High-Dimensional Data Using Nuisance Penalized Regression. Qiang Sun & Heping Zhang (2020). Journal of the American Statistical Association, DOI: 10.1080/01621459.2020.1737079
+
+Certifiably Polynomial Algorithm for Best Group Subset Selection. Zhang, Yanhang, Junxian Zhu, Jin Zhu, and Xueqin Wang (2021). arXiv preprint arXiv:2104.12576.
 }
 \seealso{
 \code{\link{print.abess}}, 

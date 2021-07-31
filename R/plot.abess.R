@@ -1,4 +1,4 @@
-#' @title Creat plot from a fitted "abess" object
+#' @title Creat plot from a fitted "\code{abess}" object
 #' 
 #' @description Produces a coefficient/deviance/tuning-value plot 
 #' for a fitted "abess" object.
@@ -23,6 +23,8 @@
 #' each dimension of multivariate response.
 #' 
 #' @inherit abess.default seealso
+#' 
+#' @method plot abess
 #' 
 #' @export
 #' 
@@ -65,15 +67,17 @@ plot.abess <- function (x,
   }
   df_list <- x[["support.size"]]
   
+  default_mar <- c(5, 4, 3, 2) + 0.1
+  
   if (type %in% c("dev", "tune")) {
     plot_loss(y_value, df_list, 
-              mar = c(3, 4, 3, 4), 
+              mar = default_mar, 
               ic.type = ifelse(type == "dev", "dev", 
                                x[["tune.type"]]))
   }
   if (type %in% c("coef", "l2norm")) {
     plot_solution(y_value, df_list, 
-                  mar = c(3, 4, 3, 4), label)
+                  mar = default_mar, label)
   }
 }
 
@@ -82,15 +86,15 @@ plot_loss <- function(loss, df,
                       ic.type) {
   
   graphics::plot.new()                            # empty plot
-  graphics::plot.window(range(df), range(loss), xaxs="i")
-  oldpar <- graphics::par(mar = mar, lend="square")          # square line ends
+  graphics::plot.window(range(df), range(loss), xaxs = "i")
+  oldpar <- graphics::par(mar = mar, lend = "square")          # square line ends
   graphics::par(new = TRUE)                         # add to the plot
-  graphics::plot(df, loss, type = "b", 
+  graphics::plot(df, loss, type = "o", pch = 16, 
+                 col = "#3182bd", 
                  ylab = ifelse(ic.type == "cv", 
                                "cross validation deviance", 
                                ic.type),
-                 xlim = c(0, max(df)))
-  graphics::title(xlab = "Support size", line = 2)
+                 xlim = c(0, max(df)), xlab = "Support size")
   graphics::grid()
   graphics::axis(2)
   #axis(4, pos=par("usr")[1], line=0.5)  # this would plot them 'inside'
@@ -110,9 +114,8 @@ plot_solution_one <- function(beta, df, mar, label) {
   
   graphics::plot(df, beta[1, , drop = TRUE], 
                  type = "l", col = 1, 
-                 xlim = c(0, max(df)), xlab = "",
+                 xlim = c(0, max(df)), xlab = "Support size",
                  ylim = range(beta), ylab = "Coefficients")
-  graphics::title(xlab = 'Support size', line = 2)
   for (i in 2:p) {
     graphics::lines(df, beta[i, , drop = TRUE], 
                     col = i, xlim = c(0, p + 1))

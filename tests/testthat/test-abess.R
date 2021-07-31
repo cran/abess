@@ -30,17 +30,25 @@ test_batch <- function(abess_fit, dataset, family) {
   names(est_beta) <- NULL
   names(est_coef0) <- NULL
   
-  expect_equal(oracle_beta, est_beta, tolerance = 1e-5)
-  expect_equal(oracle_coef0, est_coef0, tolerance = 1e-5)
+  if (Sys.info()[1] == "Darwin") {
+    threshold <- 1e-5
+  } else {
+    threshold <- 1e-3
+  }
+  
+  expect_equal(oracle_beta, est_beta, tolerance = threshold)
+  expect_equal(oracle_coef0, est_coef0, tolerance = threshold)
   
   ## deviance
   f <- family()
   if (f[["family"]] == "gaussian") {
     oracle_dev <- mean((oracle_est[["residuals"]])^2)
-  } else {
+  } else if (f[["family"]] != "poisson") {
     oracle_dev <- deviance(oracle_est) / 2
+  } else {
+    oracle_dev <- extract(abess_fit)[["dev"]]
   }
-  expect_equal(oracle_dev, abess_fit[["dev"]][fit_s_size + 1])
+  expect_equal(oracle_dev, extract(abess_fit)[["dev"]])
 }
 
 test_batch_multivariate <- function(abess_fit, dataset, gaussian = TRUE) {
@@ -148,8 +156,8 @@ test_that("Covariance update works", {
 })
 
 test_that("abess (gaussian) works", {
-  n <- 500
-  p <- 1500
+  n <- 300
+  p <- 300
   support_size <- 3
   
   ## default interface
@@ -165,35 +173,37 @@ test_that("abess (gaussian) works", {
 })
 
 test_that("abess (binomial) works", {
-  n <- 500
-  p <- 1500
+  n <- 150
+  p <- 100
   support.size <- 3
   
   dataset <- generate.data(n, p, support.size, 
                            family = "binomial", seed = 1)
   abess_fit <- abess(dataset[["x"]], dataset[["y"]], 
                      family = "binomial", tune.type = "cv", 
-                     newton = "exact", max.newton.iter = 50, 
-                     newton.thresh = 1e-8)
+                     newton = "exact", newton.thresh = 1e-8)
   test_batch(abess_fit, dataset, binomial)
+  
+  abess_fit1 <- abess(dataset[["x"]], dataset[["y"]], 
+                      family = "binomial", tune.type = "cv", 
+                      newton = "approx", newton.thresh = 1e-8)
+  beta <- extract(abess_fit)[["support.beta"]]
+  beta1 <- extract(abess_fit1)[["support.beta"]]
+  expect_true(all(abs(beta - beta1) < 1e-3))
 })
 
 test_that("abess (cox) works", {
-  skip("skip cox now!")
   if (!require("survival")) {
     install.packages("survival")
   }
-  n <- 500
-  p <- 1000
+  n <- 100
+  p <- 50
   support.size <- 3
   
   dataset <- generate.data(n, p, support.size, 
                            family = "cox", seed = 1)
-  t <- system.time(abess_fit <- abess(
-    dataset[["x"]], dataset[["y"]], 
-    family = "cox", tune.type = "cv", 
-    newton = "exact", max.newton.iter = 10, num.threads = 8)
-  )
+  abess_fit <- abess(dataset[["x"]], dataset[["y"]], 
+                     family = "cox", newton = "approx", tune.type = "cv")
   
   ## support size
   fit_s_size <- abess_fit[["best.size"]]
@@ -221,12 +231,19 @@ test_that("abess (cox) works", {
     abs_coxph_diff <- abs(oracle_beta[i] - true_beta[i])
     expect_lt(abs_abess_diff / abs_coxph_diff, 1.05)
   }
+  
+  ## Surv object input:
+  dataset[["y"]] <- survival::Surv(time = dataset[["y"]][, 1], 
+                                   event = dataset[["y"]][, 2])
+  abess_fit1 <- abess(dataset[["x"]], dataset[["y"]], 
+                      family = "cox", newton = "approx", 
+                      tune.type = "cv")
+  expect_true(all.equal(abess_fit, abess_fit1))
 })
 
 test_that("abess (poisson) works", {
-  skip("Skip poisson now!")
-  n <- 500
-  p <- 1000
+  n <- 200
+  p <- 100
   support.size <- 3
   
   dataset <- generate.data(n, p, support.size, 
@@ -260,7 +277,8 @@ test_that("abess (multinomial) works", {
   n <- 600
   p <- 100
   support_size <- 3
-  dataset <- generate.data(n, p, support_size, seed = 1, family = "multinomial")
+  dataset <- generate.data(n, p, support_size, 
+                           seed = 1, family = "multinomial")
   abess_fit <- abess(dataset[["x"]], dataset[["y"]], 
                      family = "multinomial", tune.type = "cv", 
                      newton = "approx")
@@ -296,3 +314,51 @@ test_that("Fast than Lasso (gaussian) works", {
   expect_lt(t1[3], t2[3])
 })
 
+test_that("abess (golden section) works", {
+  n <- 200
+  p <- 200
+  support_size <- 3
+  dataset <- generate.data(n, p, support_size)
+  
+  ## default search range
+  abess_fit <- abess(dataset[["x"]], dataset[["y"]], tune.path = "gsection")
+  test_batch(abess_fit, dataset, gaussian)
+  
+  ## self-defined search range
+  abess_fit <- abess(dataset[["x"]], dataset[["y"]], 
+                     tune.path = "gsection", gs.range = c(1, 6))
+  test_batch(abess_fit, dataset, gaussian)
+})
+
+test_that("abess (output) works", {
+  n <- 50
+  p <- 50
+  support_size <- 3
+  
+  dataset <- generate.data(n, p, support_size, seed = 1)
+  abess_fit <- abess(dataset[["x"]], dataset[["y"]])
+  expect_true(is.vector(abess_fit[["dev"]]))
+  expect_true(is.vector(abess_fit[["tune.value"]]))
+  expect_true(is.vector(abess_fit[["support.size"]]))
+  expect_true(is.vector(abess_fit[["intercept"]]))
+  expect_true(is.vector(abess_fit[["edf"]]))
+})
+
+test_that("abess (always-include) works", {
+  n <- 100
+  p <- 20
+  support_size <- 3
+  dataset <- generate.data(n, p, support_size)
+  abess_fit <- abess(dataset[["x"]], dataset[["y"]], always.include = c(1))
+  expect_true(all((abess_fit[["beta"]][1, , drop = TRUE][-1] != 0)))
+})
+
+test_that("abess (L2 regularization) works", {
+  n <- 100
+  p <- 20
+  support_size <- 3
+  dataset <- generate.data(n, p, support_size)
+  abess_fit <- abess(dataset[["x"]], dataset[["y"]], lambda = 0.1)
+  expect_true(all(diff(abess_fit[["edf"]]) > 0))
+  expect_true(all(abess_fit[["edf"]] <= abess_fit[["support.size"]]))
+})

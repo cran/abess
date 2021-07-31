@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Jin Zhu" />
+
+
+<title>Quick start for abess: Linear regression</title>
+
+<script src="v01-abess-guide_files/header-attrs-2.8/header-attrs.js"></script>
+<script src="v01-abess-guide_files/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="v01-abess-guide_files/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="v01-abess-guide_files/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="v01-abess-guide_files/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="v01-abess-guide_files/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="v01-abess-guide_files/navigation-1.1/tabsets.js"></script>
+<link href="v01-abess-guide_files/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="v01-abess-guide_files/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Quick start for <code>abess</code>: Linear regression</h1>
+<h4 class="author">Jin Zhu</h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#briey-introduction">Briey introduction</a></li>
+<li><a href="#quick-example">Quick example</a>
+<ul>
+<li><a href="#fixed-support-size-best-subset-selection">Fixed support size best subset selection</a></li>
+<li><a href="#adaptive-best-subset-selection">Adaptive best subset selection</a></li>
+</ul></li>
+<li><a href="#real-data-example">Real data example</a>
+<ul>
+<li><a href="#hitters-dataset">Hitters Dataset</a></li>
+<li><a href="#running-abess">Running ABESS</a></li>
+<li><a href="#interpret-the-result">Interpret the Result</a></li>
+</ul></li>
+<li><a href="#advanced-features">Advanced features</a>
+<ul>
+<li><a href="#feature-screening-for-ultra-high-dimensional-dataset">Feature screening for ultra-high dimensional dataset</a></li>
+<li><a href="#more-features">More features</a></li>
+</ul></li>
+</ul>
+</div>
+
+<div id="briey-introduction" class="section level2">
+<h2>Briey introduction</h2>
+<p>The R package <code>abess</code> implement a polynomial algorithm in the <a href="https://www.pnas.org/content/117/52/33117"></a> for best-subset selection problem: <span class="math display">\[\min_{\beta \in \mathbb{R}^p} \frac{1}{2n} \| y - X\beta\|_2^2, \text{ subject to } \|\beta\|_0 \leq s,\]</span> where <span class="math inline">\(\| \cdot \|_2\)</span> is the <span class="math inline">\(\ell_2\)</span> norm, <span class="math inline">\(\|\beta\|_0=\sum_{i=1}^pI( \beta_i\neq 0)\)</span> is the <span class="math inline">\(\ell_0\)</span> norm of <span class="math inline">\(\beta\)</span>, and the sparsity level <span class="math inline">\(s\)</span> is usually an unknown non-negative integer. Next, we present an example to show how to use the <strong>abess</strong> package to solve a simple problem.</p>
+</div>
+<div id="quick-example" class="section level2">
+<h2>Quick example</h2>
+<div id="fixed-support-size-best-subset-selection" class="section level3">
+<h3>Fixed support size best subset selection</h3>
+<p>We generate a design matrix <span class="math inline">\(X\)</span> containing 300 observation and each observation has 1000 predictors. The response variable <span class="math inline">\(y\)</span> is linearly related to the first, second, and fifth predictors in <span class="math inline">\(X\)</span>: <span class="math display">\[y = 3X_1 + 1.5X_2 + 2X_5 + \epsilon,\]</span> where <span class="math inline">\(\epsilon\)</span> is a standard normal random variable.</p>
+<pre class="r"><code>library(abess)
+synthetic_data &lt;- generate.data(n = 300, p = 1000, 
+                                beta = c(3, 1.5, 0, 0, 2, rep(0, 995)))
+dim(synthetic_data[[&quot;x&quot;]])</code></pre>
+<pre><code>## [1]  300 1000</code></pre>
+<pre class="r"><code>head(synthetic_data[[&quot;y&quot;]])</code></pre>
+<pre><code>##           [,1]
+## [1,] -4.063922
+## [2,]  3.855246
+## [3,] -3.041391
+## [4,] -1.081257
+## [5,]  4.986772
+## [6,]  4.470901</code></pre>
+<pre class="r"><code>dat &lt;- cbind.data.frame(&quot;y&quot; = synthetic_data[[&quot;y&quot;]], 
+                        synthetic_data[[&quot;x&quot;]])</code></pre>
+<p>Then, we use the main function <code>abess</code> in the package to fit this dataset. By setting the arguments <code>support.size = s</code>, <code>abess</code> function conducts <strong>Algorithm 1</strong> in the <a href="https://www.pnas.org/content/117/52/33117"></a> for best-subset selection with a sparsity level <code>s</code>. In our example, we set the options: <code>support.size = 3</code>, and we run <strong>Algorithm 1</strong> with the following command:</p>
+<pre class="r"><code>abess_fit &lt;- abess(y ~ ., data = dat, support.size = 3)</code></pre>
+<p>The output of <code>abess</code> comprises the selected best model:</p>
+<pre class="r"><code>head(coef(abess_fit, sparse = FALSE))</code></pre>
+<pre><code>##                       3
+## (intercept) -0.01802179
+## x1           2.96418205
+## x2           1.45090693
+## x3           0.00000000
+## x4           0.00000000
+## x5           1.90592036</code></pre>
+<p>The best model’s support set is identical to the ground truth, and the coefficient estimation is the same as the oracle estimator given by <code>lm</code> function:</p>
+<pre class="r"><code>lm(y ~ ., data = dat[, c(1, c(1, 2, 5) + 1)])</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = y ~ ., data = dat[, c(1, c(1, 2, 5) + 1)])
+## 
+## Coefficients:
+## (Intercept)           x1           x2           x5  
+##    -0.01802      2.96418      1.45091      1.90592</code></pre>
+<!-- Users could `print`, `summary` or `predict` this bestmodel object just like working with classical regression modeling. This would be helpful for data scientists who are familiar with `lm` functions in R. -->
+</div>
+<div id="adaptive-best-subset-selection" class="section level3">
+<h3>Adaptive best subset selection</h3>
+<p>Imaging we are unknown about the true sparsity level in real world data, and thus, we need to determine the most proper one. The <strong>Algorithm 3</strong> in the <a href="https://www.pnas.org/content/117/52/33117"></a> is designed for this scenario. <code>abess</code> is capable of performing this algorithm:</p>
+<pre class="r"><code>abess_fit &lt;- abess(y ~ ., data = dat)</code></pre>
+<p>The output of <code>abess</code> also comprises the selected best model:</p>
+<pre class="r"><code>best_size &lt;- abess_fit[[&quot;best.size&quot;]]
+print(best_size)</code></pre>
+<pre><code>## [1] 3</code></pre>
+<pre class="r"><code>head(coef(abess_fit, support.size = best_size, sparse = FALSE))</code></pre>
+<pre><code>##                       3
+## (intercept) -0.01802179
+## x1           2.96418205
+## x2           1.45090693
+## x3           0.00000000
+## x4           0.00000000
+## x5           1.90592036</code></pre>
+<p>The output model accurately detect the true model size, which implies the <strong>Algorithm 3</strong> efficiently find both the optimal sparsity level and true effective predictors.</p>
+</div>
+</div>
+<div id="real-data-example" class="section level2">
+<h2>Real data example</h2>
+<div id="hitters-dataset" class="section level3">
+<h3>Hitters Dataset</h3>
+<p>In this tutorial, we are going to demonstrate how to use the <code>abess</code> package to carry out best subset selection on the <code>Hitters</code> dataset. We hope to use several predictors related to the performance of the baseball athletes last year to predict their salary. First, let’s have a look at this dataset. There are 19 variables except <code>Salary</code> and 322 observations.</p>
+<pre class="r"><code>Hitters &lt;- read.csv(&quot;Hitters.csv&quot;, header = TRUE)
+head(Hitters)</code></pre>
+<pre><code>##   AtBat Hits HmRun Runs RBI Walks Years CAtBat CHits CHmRun CRuns CRBI CWalks
+## 1   293   66     1   30  29    14     1    293    66      1    30   29     14
+## 2   315   81     7   24  38    39    14   3449   835     69   321  414    375
+## 3   479  130    18   66  72    76     3   1624   457     63   224  266    263
+## 4   496  141    20   65  78    37    11   5628  1575    225   828  838    354
+## 5   321   87    10   39  42    30     2    396   101     12    48   46     33
+## 6   594  169     4   74  51    35    11   4408  1133     19   501  336    194
+##   League Division PutOuts Assists Errors Salary NewLeague
+## 1      A        E     446      33     20     NA         A
+## 2      N        W     632      43     10  475.0         N
+## 3      A        W     880      82     14  480.0         A
+## 4      N        E     200      11      3  500.0         N
+## 5      N        E     805      40      4   91.5         N
+## 6      A        W     282     421     25  750.0         A</code></pre>
+<pre class="r"><code>dim(Hitters)</code></pre>
+<pre><code>## [1] 322  20</code></pre>
+<pre class="r"><code>sum(is.na(Hitters))</code></pre>
+<pre><code>## [1] 59</code></pre>
+<p>Note that this dataset contains some missing data. So we use the <code>na.omit()</code> function to delete rows that have incomplete information. After that, we have 263 observations remains.</p>
+<pre class="r"><code>Hitters &lt;- na.omit(Hitters)
+dim(Hitters)</code></pre>
+<pre><code>## [1] 263  20</code></pre>
+<pre class="r"><code>sum(is.na(Hitters))</code></pre>
+<pre><code>## [1] 0</code></pre>
+<p>Then we change the factors into dummy variables with the <code>model.matrix()</code> function. Note that the <code>abess</code> function will automatically include the intercept.</p>
+<pre class="r"><code>Hitters &lt;- model.matrix(~., Hitters)[, -1]
+Hitters &lt;- as.data.frame(Hitters)</code></pre>
+</div>
+<div id="running-abess" class="section level3">
+<h3>Running ABESS</h3>
+<p>The <code>abess()</code> function in the <code>abess</code> package allows you to perform best subset selection in a highly efficient way. You can call the <code>abess()</code> function using formula just like what you do with <code>lm()</code>. Or you can specify the design matrix <code>x</code> and the response <code>y</code>. The <code>system.time</code> function records the run time.</p>
+<pre class="r"><code>library(abess)
+abess_fit &lt;- abess(Salary ~ ., Hitters)
+abess_fit &lt;- abess(Hitters[, -which(colnames(Hitters) == &quot;Salary&quot;)], Hitters$Salary)
+class(abess_fit)</code></pre>
+<pre><code>## [1] &quot;abess&quot;</code></pre>
+</div>
+<div id="interpret-the-result" class="section level3">
+<h3>Interpret the Result</h3>
+<p>After get the estimator, we can further do more exploring work. The output of <code>abess()</code> function contains the best model for all the candidate support size in the <code>support.size</code>. You can use some generic function to quickly draw some information of those estimators.</p>
+<pre class="r"><code># draw the estimated coefficients on all candidate support size
+coef(abess_fit)</code></pre>
+<pre><code>## 20 x 20 sparse Matrix of class &quot;dgCMatrix&quot;
+##                                                                      
+## (intercept) 535.9259 274.5803864 -47.9559022 -71.4592204   13.9231044
+## AtBat         .        .           .           .            .        
+## Hits          .        .           3.3008446   2.8038162    2.6757978
+## HmRun         .        .           .           .            .        
+## Runs          .        .           .           .            .        
+## RBI           .        .           .           .            .        
+## Walks         .        .           .           .            .        
+## Years         .        .           .           .            .        
+## CAtBat        .        .           .           .            .        
+## CHits         .        .           .           .            .        
+## CHmRun        .        .           .           .            .        
+## CRuns         .        .           .           .            .        
+## CRBI          .        0.7909536   0.6898994   0.6825275    0.6817790
+## CWalks        .        .           .           .            .        
+## LeagueN       .        .           .           .            .        
+## DivisionW     .        .           .           .         -139.9538855
+## PutOuts       .        .           .           0.2735814    0.2735002
+## Assists       .        .           .           .            .        
+## Errors        .        .           .           .            .        
+## NewLeagueN    .        .           .           .            .        
+##                                                                             
+## (intercept)   -7.6563819   91.5117981   67.9431538  114.5067227  197.6616396
+## AtBat          .           -1.8685892   -1.8535176   -2.1250564   -2.0803280
+## Hits           2.0467293    7.6043976    7.6348879    7.6482495    6.8263359
+## HmRun          .            .            .            .            .        
+## Runs           .            .            .            .            .        
+## RBI            .            .            .            .            .        
+## Walks          2.5574106    3.6976468    3.6644212    5.2391412    5.9761215
+## Years          .            .            .            .          -15.9414459
+## CAtBat         .            .            .            .            .        
+## CHits          .            .            .            .            .        
+## CHmRun         .            .            .            .            .        
+## CRuns          .            .            .            .            0.8143029
+## CRBI           0.6492007    0.6430169    0.6445474    0.8959228    0.6000624
+## CWalks         .            .            .           -0.3487728   -0.7503761
+## LeagueN        .            .           35.0926551    .            .        
+## DivisionW   -137.3676333 -122.9515338 -122.5437635 -126.8503150 -123.4936780
+## PutOuts        0.2518721    0.2643076    0.2584749    0.2655057    0.2702288
+## Assists        .            .            .            0.1790809    .        
+## Errors         .            .            .            .            .        
+## NewLeagueN     .            .            .            .            .        
+##                                                                             
+## (intercept)  206.5672285  218.5527334  198.4967427  142.9090129  144.6793182
+## AtBat         -2.2556858   -2.2102483   -2.1783358   -2.0120568   -2.0883279
+## Hits           7.0378766    6.9279436    6.9273744    7.3751935    7.6436454
+## HmRun          .            .            .            .            2.3406524
+## Runs           .            .            .           -1.7130320   -2.3580478
+## RBI            .            .            .            .            .        
+## Walks          6.2793246    6.2243570    6.1667822    5.9906173    6.1794713
+## Years        -16.7414858  -17.2542087  -17.0664017    .            .        
+## CAtBat         .            .            .           -0.1527096   -0.1488074
+## CHits          .            .            .            .            .        
+## CHmRun         .            .            .            .            .        
+## CRuns          0.8132079    0.8111144    0.8082476    1.5535444    1.5931621
+## CRBI           0.6508515    0.6594949    0.6571221    0.7850103    0.7170767
+## CWalks        -0.7882990   -0.7934064   -0.7898841   -0.8404419   -0.8565844
+## LeagueN        .            .           29.1474123   41.9165343   44.2352269
+## DivisionW   -123.2261893 -123.1231837 -122.8009102 -112.3809790 -112.8079905
+## PutOuts        0.2824819    0.2883338    0.2830813    0.2896964    0.2876182
+## Assists        0.1872292    0.2795390    0.2732454    0.3312276    0.3677311
+## Errors         .           -3.0198567   -3.3107203   -2.8685826   -3.1271251
+## NewLeagueN     .            .            .            .            .        
+##                                                                             
+## (intercept)  163.3275824  163.0064063  162.9932027  163.1632541  163.1035878
+## AtBat         -2.1085651   -2.0890552   -2.0302709   -2.0186239   -1.9798729
+## Hits           7.6501026    7.8848050    7.7483580    7.7381465    7.5007675
+## HmRun          2.3654025    3.8223369    4.6470956    4.6127592    4.3308829
+## Runs          -2.3535049   -2.5377954   -2.5882384   -2.6272166   -2.3762100
+## RBI            .           -0.8815425   -1.1165187   -1.1190038   -1.0449620
+## Walks          6.1730276    6.2941910    6.2778803    6.3108843    6.2312863
+## Years         -4.2321550   -4.0947594   -3.7490950   -3.8738277   -3.4890543
+## CAtBat        -0.1341737   -0.1350897   -0.1526121   -0.1514014   -0.1713405
+## CHits          .            .            .            .            0.1339910
+## CHmRun         .            .           -0.3876922   -0.3938397   -0.1728611
+## CRuns          1.5426322    1.5321626    1.5730263    1.5708067    1.4543049
+## CRBI           0.7144063    0.7420886    0.8965235    0.8961782    0.8077088
+## CWalks        -0.8446970   -0.8559654   -0.8423839   -0.8467366   -0.8115709
+## LeagueN       42.2835360   42.2286763   41.6482699   61.3012822   62.5994230
+## DivisionW   -113.9853363 -116.0422926 -116.4111439 -116.5862127 -116.8492456
+## PutOuts        0.2859836    0.2858651    0.2827595    0.2829156    0.2818925
+## Assists        0.3643305    0.3641325    0.3661464    0.3640952    0.3710692
+## Errors        -3.2379385   -3.1409199   -3.1840695   -3.2558249   -3.3607605
+## NewLeagueN     .            .            .          -22.9788245  -24.7623251</code></pre>
+<pre class="r"><code># get the deviance of the estimated model on all candidate support size
+deviance(abess_fit)</code></pre>
+<pre><code>##  [1] 202734.27 137565.32 116526.84 111214.06 106353.05 104483.91  99600.40
+##  [8]  99303.92  98158.60  94654.62  94081.77  93894.74  93695.85  92354.17
+## [15]  92200.23  92154.67  92106.59  92065.27  92032.81  92017.87</code></pre>
+<pre class="r"><code># print the fitted model
+print(abess_fit)</code></pre>
+<pre><code>## Call:
+## abess.default(x = Hitters[, -which(colnames(Hitters) == &quot;Salary&quot;)], 
+##     y = Hitters$Salary)
+## 
+##    support.size       dev      GIC
+## 1             0 202734.27 3213.768
+## 2             1 137565.32 3116.836
+## 3             2 116526.84 3078.241
+## 4             3 111214.06 3071.026
+## 5             4 106353.05 3064.330
+## 6             5 104483.91 3064.725
+## 7             6  99600.40 3057.194
+## 8             7  99303.92 3061.468
+## 9             8  98158.60 3063.475
+## 10            9  94654.62 3058.972
+## 11           10  94081.77 3062.434
+## 12           11  93894.74 3066.968
+## 13           12  93695.85 3071.469
+## 14           13  92354.17 3072.733
+## 15           14  92200.23 3077.352
+## 16           15  92154.67 3082.280
+## 17           16  92106.59 3087.201
+## 18           17  92065.27 3092.141
+## 19           18  92032.81 3097.106
+## 20           19  92017.87 3102.121</code></pre>
+<p>Prediction is allowed for all the estimated model. Just call <code>predict.abess()</code> function with the <code>support.size</code> set to the size of model you are interested in. If a <code>support.size</code> is not provided, prediction will be made on the model with best tuning value.</p>
+<pre class="r"><code>hitters_pred &lt;- predict(abess_fit, 
+                        newx = Hitters[, -which(colnames(Hitters) == &quot;Salary&quot;)], 
+                        support.size = c(3, 4))
+head(hitters_pred)</code></pre>
+<pre><code>##           3         4
+## 2 611.11976  545.8175
+## 3 715.34087  643.8563
+## 4 950.55323 1017.2414
+## 5 424.10211  498.2470
+## 6 708.86493  632.3839
+## 7  59.21692  139.8497</code></pre>
+<p>The <code>plot.abess()</code> function helps to visualize the change of models with the change of support size. There are 5 types of graph you can generate, including <code>coef</code> for the coefficient value, <code>l2norm</code> for the L2-norm of the coefficients, <code>dev</code> for the deviance and <code>tune</code> for the tuning value. Default if <code>coef</code>.</p>
+<pre class="r"><code>plot(abess_fit, label = TRUE)</code></pre>
+<p><img src="v01-abess-guide_files/figure-html/unnamed-chunk-14-1.png" /><!-- --></p>
+<p>The graph shows that, beginning from the most dense model, the 15th variable (Division, A factor with levels E and W indicating player’s division at the end of 1986) is included in the active set until the support size reaches 3.</p>
+<p>We can also generate a graph about the tuning value. Remember that we used the default GIC to tune the support size.</p>
+<pre class="r"><code>plot(abess_fit, type = &quot;tune&quot;)</code></pre>
+<p><img src="v01-abess-guide_files/figure-html/unnamed-chunk-15-1.png" /><!-- --></p>
+<p>The tuning value reaches the lowest point at 6. And We might choose the estimated model with support size equals 6 as our final model. In fact, the tuning values of different model sizes are provided in <code>tune.value</code> of the <code>abess</code> object. You can get the best model size through the following call.</p>
+<pre class="r"><code>extract(abess_fit)[[&quot;support.size&quot;]]</code></pre>
+<pre><code>## [1] 6</code></pre>
+<p>To extract any model from the <code>abess</code> object, we can call the <code>extract()</code> function with a given <code>support.size</code>. If <code>support.size</code> is not provided, the model with the best tuning value will be returned. Here we extract the model with support size equals 6.</p>
+<pre class="r"><code>best.model &lt;- extract(abess_fit, support.size = 6)
+str(best.model)</code></pre>
+<pre><code>## List of 7
+##  $ beta        :Formal class &#39;dgCMatrix&#39; [package &quot;Matrix&quot;] with 6 slots
+##   .. ..@ i       : int [1:6] 0 1 5 11 14 15
+##   .. ..@ p       : int [1:2] 0 6
+##   .. ..@ Dim     : int [1:2] 19 1
+##   .. ..@ Dimnames:List of 2
+##   .. .. ..$ : chr [1:19] &quot;AtBat&quot; &quot;Hits&quot; &quot;HmRun&quot; &quot;Runs&quot; ...
+##   .. .. ..$ : chr &quot;6&quot;
+##   .. ..@ x       : num [1:6] -1.869 7.604 3.698 0.643 -122.952 ...
+##   .. ..@ factors : list()
+##  $ intercept   : num 91.5
+##  $ support.size: num 6
+##  $ support.vars: chr [1:6] &quot;AtBat&quot; &quot;Hits&quot; &quot;Walks&quot; &quot;CRBI&quot; ...
+##  $ support.beta: num [1:6] -1.869 7.604 3.698 0.643 -122.952 ...
+##  $ dev         : num 99600
+##  $ tune.value  : num 3057</code></pre>
+<p>The return is a list containing the basic information of the estimated model.</p>
+</div>
+</div>
+<div id="advanced-features" class="section level2">
+<h2>Advanced features</h2>
+<div id="feature-screening-for-ultra-high-dimensional-dataset" class="section level3">
+<h3>Feature screening for ultra-high dimensional dataset</h3>
+<p>The <a href="https://archive.ics.uci.edu/ml/datasets/communities+and+crime"></a> consists of 18 variables about crime from the 1995 FBI UCR (e.g., per capita arson crimes and per capita violent crimes), communities information in the U.S. (e.g., the percent of the population considered urban), socio-economic data from the 90s census (e.g., the median family income), and law enforcement data from the 1990 law enforcement management and admin stats survey (e.g., per capita number of police officers). It would be appropriate if any of the crime state in community can be modeled by the basic community information, socio-economic and law enforcement state in community. Here, without the loss of generality, per capita violent crimes is chosen as the response variable, and 102 numerical variables as well as their pairwise interactions is considered as predictors. <!-- Note that, the numerical variables with at least 50\% percentages missing observations are excluded,  --> <!-- and 200 observations without missing records are randomly picked out from the pool.  --> The pre-processed dataset for statistical modeling has 200 observations and 5253 predictors, and the code for pre-processing are openly shared in <a href="https://github.com/abess-team/abess/blob/master/R-package/data-raw/DATASET_VIGNETTES.R"></a>.<br />
+The pre-processed dataset can be freely downloaded by running:</p>
+<pre class="r"><code>working_directory &lt;- getwd()
+if (file.exists(&quot;crime.rda&quot;)) {
+  load(&quot;crime.rda&quot;)
+} else {
+  crime_data_url &lt;- &quot;https://github.com/abess-team/abess/raw/master/R-package/data-raw/crime.rda&quot;
+  download.file(crime_data_url, &quot;crime.rda&quot;)
+  load(file.path(working_directory, &quot;crime.rda&quot;))
+}</code></pre>
+<p>As mentioned before, this dataset comprises 5000+ features, much larger than the number of observations:</p>
+<pre class="r"><code>dim(crime)</code></pre>
+<pre><code>## [1]  500 5254</code></pre>
+<p>And thus, it would be better to first perform feature screening, which is also supported by the <code>abess</code> function. Suppose we are interested in retaining 1000 variables with the largest marginal utility, then we can conduct the command:</p>
+<pre class="r"><code>abess_fit &lt;- abess(y ~ ., data = crime, screening.num = 1000)
+str(abess_fit)</code></pre>
+<pre><code>## List of 14
+##  $ beta          :Formal class &#39;dgCMatrix&#39; [package &quot;Matrix&quot;] with 6 slots
+##   .. ..@ i       : int [1:528] 442 442 3950 442 3267 3950 442 1747 3267 3950 ...
+##   .. ..@ p       : int [1:34] 0 0 1 3 6 10 15 21 28 36 ...
+##   .. ..@ Dim     : int [1:2] 5253 33
+##   .. ..@ Dimnames:List of 2
+##   .. .. ..$ : chr [1:5253] &quot;pop&quot; &quot;perHoush&quot; &quot;pctBlack&quot; &quot;pctWhite&quot; ...
+##   .. .. ..$ : chr [1:33] &quot;0&quot; &quot;1&quot; &quot;2&quot; &quot;3&quot; ...
+##   .. ..@ x       : num [1:528] -0.251 -0.204 4.195 -0.161 0.527 ...
+##   .. ..@ factors : list()
+##  $ intercept     : num [1:33] 599 2115 1774 1270 1045 ...
+##  $ dev           : num [1:33] 381863 172847 155975 147048 141513 ...
+##  $ tune.value    : num [1:33] 6426 6043 6004 5987 5981 ...
+##  $ nobs          : int 500
+##  $ nvars         : int 5253
+##  $ family        : chr &quot;gaussian&quot;
+##  $ tune.path     : chr &quot;sequence&quot;
+##  $ tune.type     : chr &quot;GIC&quot;
+##  $ support.size  : int [1:33] 0 1 2 3 4 5 6 7 8 9 ...
+##  $ edf           : num [1:33] 0 1 2 3 4 5 6 7 8 9 ...
+##  $ best.size     : int 12
+##  $ screening.vars: chr [1:1000] &quot;pctBlack&quot; &quot;pctWhite&quot; &quot;medIncome&quot; &quot;pctWdiv&quot; ...
+##  $ call          : language abess.formula(formula = y ~ ., data = crime, screening.num = 1000)
+##  - attr(*, &quot;class&quot;)= chr &quot;abess&quot;</code></pre>
+<p>The returned object of <code>abess</code> includes the features selected by screening. We exhibit six variables of them:</p>
+<pre class="r"><code>head(abess_fit[[&quot;screening.vars&quot;]])</code></pre>
+<pre><code>## [1] &quot;pctBlack&quot;     &quot;pctWhite&quot;     &quot;medIncome&quot;    &quot;pctWdiv&quot;      &quot;pctPubAsst&quot;  
+## [6] &quot;medFamIncome&quot;</code></pre>
+<p>Then, by the generic <code>extract</code> function, we can obtain the best model detected by <code>ABESS</code> algorithm, and get the variables in the best model:</p>
+<pre class="r"><code>best_model &lt;- extract(abess_fit)
+str(best_model)</code></pre>
+<pre><code>## List of 7
+##  $ beta        :Formal class &#39;dgCMatrix&#39; [package &quot;Matrix&quot;] with 6 slots
+##   .. ..@ i       : int [1:12] 303 331 368 405 1178 1747 2329 2603 3014 3267 ...
+##   .. ..@ p       : int [1:2] 0 12
+##   .. ..@ Dim     : int [1:2] 5253 1
+##   .. ..@ Dimnames:List of 2
+##   .. .. ..$ : chr [1:5253] &quot;pop&quot; &quot;perHoush&quot; &quot;pctBlack&quot; &quot;pctWhite&quot; ...
+##   .. .. ..$ : chr &quot;12&quot;
+##   .. ..@ x       : num [1:12] 0.336 -0.444 0.458 -0.134 0.196 ...
+##   .. ..@ factors : list()
+##  $ intercept   : num 706
+##  $ support.size: int 12
+##  $ support.vars: chr [1:12] &quot;pctBlack:pctWhite&quot; &quot;pctBlack:pctCollGrad&quot; &quot;pctBlack:pctPopDenseHous&quot; &quot;pctWhite:pct12.1&quot; ...
+##  $ support.beta: num [1:12] 0.336 -0.444 0.458 -0.134 0.196 ...
+##  $ dev         : num 111690
+##  $ tune.value  : num 5963</code></pre>
+<pre class="r"><code>best_vars &lt;- best_model[[&quot;support.vars&quot;]]
+best_vars</code></pre>
+<pre><code>##  [1] &quot;pctBlack:pctWhite&quot;                   
+##  [2] &quot;pctBlack:pctCollGrad&quot;                
+##  [3] &quot;pctBlack:pctPopDenseHous&quot;            
+##  [4] &quot;pctWhite:pct12.1&quot;                    
+##  [5] &quot;pctUrban:pctUnemploy&quot;                
+##  [6] &quot;pctPubAsst:ownHousQrange&quot;            
+##  [7] &quot;otherPerCap:pctPoverty&quot;              
+##  [8] &quot;pctPoverty:ownHousMed&quot;               
+##  [9] &quot;pctEmployMfg:pctVacantBoarded&quot;       
+## [10] &quot;pctMaleDivorc:pctSmallHousUnits&quot;     
+## [11] &quot;pctKids:medOwnCostPctWO&quot;             
+## [12] &quot;pctKidsBornNevrMarr:pctVacantBoarded&quot;</code></pre>
+<!-- From the linear model based on the selected features, we see that the two predictors,  -->
+<!-- 'pctMaleDivorc:pctKidsBornNevrMarr'  -->
+<!-- (i.e., the linear interaction between the percentage of divorced males and the percentage of kids born to never married)  -->
+<!-- and 'pct65up:pctPopDenseHous'  -->
+<!-- (i.e., the linear interaction between the percentage of population that is 65 at least in age and the percent of persons in dense housing that have more than 1 person per room), have the most significant impact on the response:  -->
+<!-- We visualize the relationship between the response and the  -->
+<!-- two most significant -->
+<!-- selected predictors: -->
+<!-- ![](./crime.jpg) -->
+</div>
+<div id="more-features" class="section level3">
+<h3>More features</h3>
+<p>There are plenty features provided by <code>abess</code> packages such as logistic regression and group selection. Please the other articles in our website for more details.</p>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
