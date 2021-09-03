@@ -1,15 +1,16 @@
 Package: abess
 Type: Package
 Title: Adaptive Best Subset Selection in Polynomial Time
-Version: 0.2.0
-Date: 2021-07-31
+Version: 0.3.0
+Date: 2021-09-03
 Authors@R: c(
   person(given = "Jin", family = "Zhu", email = "zhuj37@mail2.sysu.edu.cn", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-8550-5822")),
+  person(given = "Liyuan", family = "Hu", email = "huly5@mail2.sysu.edu.cn", role = c("aut")),
+  person(given = "Junhao", family = "Huang", email = "huangjh256@mail2.sysu.edu.cn", role = c("aut")),
   person(given = "Kangkang", family = "Jiang", email = "jiangkk3@mail2.sysu.edu.cn", role = c("aut")),
   person(given = "Yanhang", family = "Zhang", email = "zhangyh98@ruc.edu.cn", role = c("aut")),
-  person(given = "Liyuan", family = "Hu", email = "huly5@mail2.sysu.edu.cn", role = c("aut")),
-  person(given = "Junhao", family = "Huang", email = "huangjh256@mail2.sysu.edu.can", role = c("aut")),
-  person(given = "Junxian", family = "Zhu", email = "zhujunx@mail2.sysu.edu.cn", role = c("aut")),
+  person(given = "Shiyun", family = "Lin", email = "shiyunlin@stu.pku.edu.cn", role = c("aut")),
+  person(given = "Junxian", family = "Zhu", email = "adaizjx@163.com", role = c("aut")),
   person(given = "Canhong", family = "Wen", email = "wencanhong@gmail.com", role = c("aut")),
   person(given = "Heping", family = "Zhang", email = "heping.zhang@yale.edu", role = c("aut"), comment = c(ORCID = "0000-0002-0688-4076")),
   person(given = "Xueqin", family = "Wang", email = "wangxq20@ustc.edu.cn", role = c("aut"), comment = c(ORCID = "0000-0001-5205-9950")), 
@@ -20,7 +21,7 @@ Description: Extremely efficient toolkit for solving the best subset selection p
 License: GPL (>= 3) | file LICENSE
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 2.10)
+Depends: R (>= 3.1.0)
 Imports: Rcpp, MASS, methods, Matrix
 LinkingTo: Rcpp, RcppEigen
 RoxygenNote: 7.1.1
@@ -32,16 +33,17 @@ URL: https://github.com/abess-team/abess,
         https://abess.readthedocs.io
 BugReports: https://github.com/abess-team/abess/issues
 NeedsCompilation: yes
-Packaged: 2021-07-31 13:16:13 UTC; zhujin
+Packaged: 2021-09-03 16:11:11 UTC; zhujin
 Author: Jin Zhu [aut, cre] (<https://orcid.org/0000-0001-8550-5822>),
-  Kangkang Jiang [aut],
-  Yanhang Zhang [aut],
   Liyuan Hu [aut],
   Junhao Huang [aut],
+  Kangkang Jiang [aut],
+  Yanhang Zhang [aut],
+  Shiyun Lin [aut],
   Junxian Zhu [aut],
   Canhong Wen [aut],
   Heping Zhang [aut] (<https://orcid.org/0000-0002-0688-4076>),
   Xueqin Wang [aut] (<https://orcid.org/0000-0001-5205-9950>),
   spectra contributors [cph] (Spectra implementation)
 Repository: CRAN
-Date/Publication: 2021-07-31 13:40:02 UTC
+Date/Publication: 2021-09-03 16:30:02 UTC

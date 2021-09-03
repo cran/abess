@@ -488,17 +488,17 @@ if (file.exists(&quot;crime.rda&quot;)) {
 str(abess_fit)</code></pre>
 <pre><code>## List of 14
 ##  $ beta          :Formal class &#39;dgCMatrix&#39; [package &quot;Matrix&quot;] with 6 slots
-##   .. ..@ i       : int [1:528] 442 442 3950 442 3267 3950 442 1747 3267 3950 ...
+##   .. ..@ i       : int [1:528] 442 442 1196 374 442 1196 374 442 1003 1196 ...
 ##   .. ..@ p       : int [1:34] 0 0 1 3 6 10 15 21 28 36 ...
 ##   .. ..@ Dim     : int [1:2] 5253 33
 ##   .. ..@ Dimnames:List of 2
 ##   .. .. ..$ : chr [1:5253] &quot;pop&quot; &quot;perHoush&quot; &quot;pctBlack&quot; &quot;pctWhite&quot; ...
 ##   .. .. ..$ : chr [1:33] &quot;0&quot; &quot;1&quot; &quot;2&quot; &quot;3&quot; ...
-##   .. ..@ x       : num [1:528] -0.251 -0.204 4.195 -0.161 0.527 ...
+##   .. ..@ x       : num [1:528] -0.251 -0.196 0.496 0.812 -0.173 ...
 ##   .. ..@ factors : list()
-##  $ intercept     : num [1:33] 599 2115 1774 1270 1045 ...
-##  $ dev           : num [1:33] 381863 172847 155975 147048 141513 ...
-##  $ tune.value    : num [1:33] 6426 6043 6004 5987 5981 ...
+##  $ intercept     : num [1:33] 599 2115 1668 1518 1189 ...
+##  $ dev           : num [1:33] 381863 172847 160611 151560 144066 ...
+##  $ tune.value    : num [1:33] 6426 6043 6019 6002 5989 ...
 ##  $ nobs          : int 500
 ##  $ nvars         : int 5253
 ##  $ family        : chr &quot;gaussian&quot;
@@ -506,7 +506,7 @@ str(abess_fit)</code></pre>
 ##  $ tune.type     : chr &quot;GIC&quot;
 ##  $ support.size  : int [1:33] 0 1 2 3 4 5 6 7 8 9 ...
 ##  $ edf           : num [1:33] 0 1 2 3 4 5 6 7 8 9 ...
-##  $ best.size     : int 12
+##  $ best.size     : int 8
 ##  $ screening.vars: chr [1:1000] &quot;pctBlack&quot; &quot;pctWhite&quot; &quot;medIncome&quot; &quot;pctWdiv&quot; ...
 ##  $ call          : language abess.formula(formula = y ~ ., data = crime, screening.num = 1000)
 ##  - attr(*, &quot;class&quot;)= chr &quot;abess&quot;</code></pre>
@@ -519,34 +519,26 @@ str(abess_fit)</code></pre>
 str(best_model)</code></pre>
 <pre><code>## List of 7
 ##  $ beta        :Formal class &#39;dgCMatrix&#39; [package &quot;Matrix&quot;] with 6 slots
-##   .. ..@ i       : int [1:12] 303 331 368 405 1178 1747 2329 2603 3014 3267 ...
-##   .. ..@ p       : int [1:2] 0 12
+##   .. ..@ i       : int [1:8] 303 374 1003 1196 1530 1746 2378 3266
+##   .. ..@ p       : int [1:2] 0 8
 ##   .. ..@ Dim     : int [1:2] 5253 1
 ##   .. ..@ Dimnames:List of 2
 ##   .. .. ..$ : chr [1:5253] &quot;pop&quot; &quot;perHoush&quot; &quot;pctBlack&quot; &quot;pctWhite&quot; ...
-##   .. .. ..$ : chr &quot;12&quot;
-##   .. ..@ x       : num [1:12] 0.336 -0.444 0.458 -0.134 0.196 ...
+##   .. .. ..$ : chr &quot;8&quot;
+##   .. ..@ x       : num [1:8] 0.192 1.071 1.867 0.301 -0.152 ...
 ##   .. ..@ factors : list()
-##  $ intercept   : num 706
-##  $ support.size: int 12
-##  $ support.vars: chr [1:12] &quot;pctBlack:pctWhite&quot; &quot;pctBlack:pctCollGrad&quot; &quot;pctBlack:pctPopDenseHous&quot; &quot;pctWhite:pct12.1&quot; ...
-##  $ support.beta: num [1:12] 0.336 -0.444 0.458 -0.134 0.196 ...
-##  $ dev         : num 111690
-##  $ tune.value  : num 5963</code></pre>
+##  $ intercept   : num -55.8
+##  $ support.size: int 8
+##  $ support.vars: chr [1:8] &quot;pctBlack:pctWhite&quot; &quot;pctBlack:pctVacantBoarded&quot; &quot;pct65up:pctMaleDivorc&quot; &quot;pctUrban:pctKidsBornNevrMarr&quot; ...
+##  $ support.beta: num [1:8] 0.192 1.071 1.867 0.301 -0.152 ...
+##  $ dev         : num 122608
+##  $ tune.value  : num 5959</code></pre>
 <pre class="r"><code>best_vars &lt;- best_model[[&quot;support.vars&quot;]]
 best_vars</code></pre>
-<pre><code>##  [1] &quot;pctBlack:pctWhite&quot;                   
-##  [2] &quot;pctBlack:pctCollGrad&quot;                
-##  [3] &quot;pctBlack:pctPopDenseHous&quot;            
-##  [4] &quot;pctWhite:pct12.1&quot;                    
-##  [5] &quot;pctUrban:pctUnemploy&quot;                
-##  [6] &quot;pctPubAsst:ownHousQrange&quot;            
-##  [7] &quot;otherPerCap:pctPoverty&quot;              
-##  [8] &quot;pctPoverty:ownHousMed&quot;               
-##  [9] &quot;pctEmployMfg:pctVacantBoarded&quot;       
-## [10] &quot;pctMaleDivorc:pctSmallHousUnits&quot;     
-## [11] &quot;pctKids:medOwnCostPctWO&quot;             
-## [12] &quot;pctKidsBornNevrMarr:pctVacantBoarded&quot;</code></pre>
+<pre><code>## [1] &quot;pctBlack:pctWhite&quot;             &quot;pctBlack:pctVacantBoarded&quot;    
+## [3] &quot;pct65up:pctMaleDivorc&quot;         &quot;pctUrban:pctKidsBornNevrMarr&quot; 
+## [5] &quot;pctWdiv:pctEmployMfg&quot;          &quot;pctPubAsst:ownHousUperQ&quot;      
+## [7] &quot;otherPerCap:pctHousWOphone&quot;    &quot;pctMaleDivorc:pctPopDenseHous&quot;</code></pre>
 <!-- From the linear model based on the selected features, we see that the two predictors,  -->
 <!-- 'pctMaleDivorc:pctKidsBornNevrMarr'  -->
 <!-- (i.e., the linear interaction between the percentage of divorced males and the percentage of kids born to never married)  -->

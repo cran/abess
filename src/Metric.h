@@ -1,5 +1,5 @@
 //
-// Created by Mamba on 2020/2/18.
+// Created by Jin Zhu on 2020/2/18.
 //
 // #define R_BUILD
 #ifndef SRC_METRICS_H
@@ -176,7 +176,6 @@ public:
       slice(data.weight, train_mask, this->train_weight_list[k]);
       slice(data.weight, group_list[k], this->test_weight_list[k]);
     }
-    // cout << "train_mask[0]: " << train_mask_list_tmp[0] << endl;
     this->train_mask_list = train_mask_list_tmp;
     this->test_mask_list = test_mask_list_tmp;
   };
@@ -238,7 +237,6 @@ public:
 
   double neg_loglik_loss(T4 &train_x, T1 &train_y, Eigen::VectorXd &train_weight, Eigen::VectorXi &g_index, Eigen::VectorXi &g_size, int train_n, int p, int N, Algorithm<T1, T2, T3, T4> *algorithm)
   {
-    // clock_t t1 = clock();
     Eigen::VectorXi A = algorithm->get_A_out();
     T2 beta = algorithm->get_beta();
     T3 coef0 = algorithm->get_coef0();
@@ -255,8 +253,6 @@ public:
     //   beta_A(k) = beta(A_ind(k));
     // }
     double L0 = algorithm->neg_loglik_loss(X_A, train_y, train_weight, beta_A, coef0, A, g_index, g_size);
-    // clock_t t2 = clock();
-    // std::cout << "ic loss time: " << ((double)(t2 - t1) / CLOCKS_PER_SEC) << endl;
 
     return L0;
   }
@@ -268,13 +264,11 @@ public:
     algorithm->update_sparsity_level(fit_arg.support_size);
     algorithm->update_lambda_level(fit_arg.lambda);
 
-    if (algorithm->get_warm_start())
-    {
-      algorithm->update_beta_init(fit_arg.beta_init);
-      algorithm->update_bd_init(fit_arg.bd_init);
-      algorithm->update_coef0_init(fit_arg.coef0_init);
-      algorithm->update_A_init(fit_arg.A_init, N);
-    }
+    algorithm->update_beta_init(fit_arg.beta_init);
+    algorithm->update_bd_init(fit_arg.bd_init);
+    algorithm->update_coef0_init(fit_arg.coef0_init);
+    algorithm->update_A_init(fit_arg.A_init, N);
+
     algorithm->fit(data.x, data.y, data.weight, data.g_index, data.g_size, data.n, data.p, data.g_num, data.status, algorithm->Sigma);
 
     if (algorithm->get_warm_start())
@@ -313,7 +307,7 @@ public:
         algorithm_list[k]->update_sparsity_level(fit_arg.support_size);
         algorithm_list[k]->update_lambda_level(fit_arg.lambda);
 
-        if (algorithm->get_warm_start())
+        if (algorithm_list[k]->get_warm_start())
         {
 
           algorithm_list[k]->update_beta_init(this->cv_init_fit_arg[k].beta_init);
