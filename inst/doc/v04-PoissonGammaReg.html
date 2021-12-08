@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Liyuan Hu, Jin Zhu, Borui Tang" />
+
+
+<title>Positive response: Poisson and Gamma regression</title>
+
+<script src="v04-PoissonGammaReg_files/header-attrs-2.8/header-attrs.js"></script>
+<script src="v04-PoissonGammaReg_files/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="v04-PoissonGammaReg_files/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="v04-PoissonGammaReg_files/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="v04-PoissonGammaReg_files/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="v04-PoissonGammaReg_files/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="v04-PoissonGammaReg_files/navigation-1.1/tabsets.js"></script>
+<link href="v04-PoissonGammaReg_files/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="v04-PoissonGammaReg_files/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Positive response: Poisson and Gamma regression</h1>
+<h4 class="author">Liyuan Hu, Jin Zhu, Borui Tang</h4>
+<h4 class="date">2021/11/3</h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#poisson-regression">Poisson Regression</a></li>
+<li><a href="#best-subset-selection-for-poisson-regression">Best Subset Selection for Poisson Regression</a></li>
+<li><a href="#interpret-the-result">Interpret the Result</a></li>
+<li><a href="#gamma-regression">Gamma Regression</a></li>
+</ul>
+</div>
+
+<div id="poisson-regression" class="section level2">
+<h2>Poisson Regression</h2>
+<p>Poisson regression involves regression models in which the response variable is in the form of counts. For example, the count of number of car accidents or number of costumers in line at a reception desk. The response variables are assumed to be generated from Poisson distributions.</p>
+<p>The general mathematical equation for Poisson regression is <span class="math display">\[
+\log(E(y_i|x_i)) = x_i^T \beta.
+\]</span> We generate some artificial data using this logic. Consider a dataset containing the information of complain calls about 100 companies over a period of 10 years. <code>count</code> gives the number of complains, and the dataset also have other variables like <code>age</code>, <code>sex</code>, <code>job</code>, <code>education</code>, <code>region</code>, <code>marriage</code>. The <code>generate.data()</code> function allow you to generate simulated data. By specifying <code>support.size = 3</code>, here we set only 3 of the 5 above mentioned variable have effect on the expectation of the response <code>count</code>.</p>
+<pre class="r"><code>library(abess)
+dat &lt;- generate.data(n = 100, p = 6, support.size = 3,family = &quot;poisson&quot;)
+colnames(dat$x) &lt;- c(&quot;age&quot;, &quot;sex&quot;, &quot;job&quot;, 
+                     &quot;education&quot;, &quot;region&quot;, &quot;marriage&quot;)
+dat$beta</code></pre>
+<pre><code>## [1] 0.0000000 0.0000000 1.3161226 0.7623454 0.6557793 0.0000000</code></pre>
+<pre class="r"><code>head(dat$x)</code></pre>
+<pre><code>##             age         sex        job  education     region    marriage
+## [1,] -0.6264538 -0.62036668  0.4094018  0.8936737  1.0744410  0.07730312
+## [2,]  0.1836433  0.04211587  1.6888733 -1.0472981  1.8956548 -0.29686864
+## [3,] -0.8356286 -0.91092165  1.5865884  1.9713374 -0.6029973 -1.18324224
+## [4,]  1.5952808  0.15802877 -0.3309078 -0.3836321 -0.3908678  0.01129269
+## [5,]  0.3295078 -0.65458464 -2.2852355  1.6541453 -0.4162220  0.99160104
+## [6,] -0.8204684  1.76728727  2.4976616  1.5122127 -0.3756574  1.59396745</code></pre>
+<pre class="r"><code>complain &lt;- data.frame(&#39;count&#39;=dat$y, dat$x)</code></pre>
+</div>
+<div id="best-subset-selection-for-poisson-regression" class="section level2">
+<h2>Best Subset Selection for Poisson Regression</h2>
+<p>The <code>abess()</code> function in the <code>abess</code> package allows you to perform best subset selection in a highly efficient way. You can call the <code>abess()</code> function using formula just like what you do with <code>lm()</code>. Or you can specify the design matrix <code>x</code> and the response <code>y</code>. To carry out a poisson regression, we should set the <code>family = "poisson"</code>.</p>
+<pre class="r"><code>library(abess)
+abess_fit &lt;- abess(x = dat$x, y = dat$y, family = &quot;poisson&quot;)
+abess_fit &lt;- abess(count ~ ., complain, family = &quot;poisson&quot;)
+class(abess_fit)</code></pre>
+<pre><code>## [1] &quot;abess&quot;</code></pre>
+<!-- By default, the `abess` function implements the ABESS algorithm with the support size changing from 0 to $\min\{p,n/log(n)p \}$ and the best support size is determined by the Generalized Informatoin Criterion (GIC). You can change the tunging criterion by specifying the argument `tune.type`. The available tuning criterion now are `gic`, `aic`, `bic`, `ebic` and `cv`. For a quicker solution, you can change the tuning strategy to a golden section path which trys to find the elbow point of the tuning criterion over the hyperparameter space. Here we give an example. -->
+<!-- ```{r} -->
+<!-- abess_fit.gs <- abess(Salary~., Hitters, family = "poisson", tune.type = "bic", tune.path = "gs") -->
+<!-- ``` -->
+</div>
+<div id="interpret-the-result" class="section level2">
+<h2>Interpret the Result</h2>
+<p>Hold on, we aren’t finished yet. After get the estimator, we can further do more exploring work. The output of <code>abess()</code> function contains the best model for all the candidate support size in the <code>support.size</code>. You can use some generic function to quickly draw some information of those estimators.</p>
+<pre class="r"><code># draw the estimated coefficients on all candidate support size
+coef(abess_fit)</code></pre>
+<pre><code>## 7 x 7 sparse Matrix of class &quot;dgCMatrix&quot;
+##                    0         1         2          3          4           5
+## (intercept) 1.581038 0.4281173 0.2558214 -0.1046763 -0.1048038 -0.10377213
+## age         .        .         .          .         -0.1220315 -0.12420272
+## sex         .        .         .          .          .          .         
+## job         .        1.5000590 1.3764397  1.3352379  1.3066533  1.30608518
+## education   .        .         .          0.7481296  0.7402970  0.74057564
+## region      .        .         0.5200980  0.6772817  0.7321942  0.72343088
+## marriage    .        .         .          .          .         -0.01863175
+##                        6
+## (intercept) -0.112594621
+## age         -0.150054463
+## sex         -0.052978982
+## job          1.310728269
+## education    0.749821752
+## region       0.733104826
+## marriage     0.004436532</code></pre>
+<pre class="r"><code># get the deviance of the estimated model on all candidate support size
+deviance(abess_fit)</code></pre>
+<pre><code>## [1]  -282.3847  -792.8596  -936.6450 -1011.8841 -1013.1902 -1013.2601 -1013.6465</code></pre>
+<pre class="r"><code># print the fitted model
+print(abess_fit)</code></pre>
+<pre><code>## Call:
+## abess.formula(formula = count ~ ., data = complain, family = &quot;poisson&quot;)
+## 
+##   support.size        dev        GIC
+## 1            0  -282.3847  -564.7694
+## 2            1  -792.8596 -1582.9829
+## 3            2  -936.6450 -1867.8174
+## 4            3 -1011.8841 -2015.5593
+## 5            4 -1013.1902 -2015.4350
+## 6            5 -1013.2601 -2012.8386
+## 7            6 -1013.6465 -2010.8750</code></pre>
+<p>Prediction is allowed for all the estimated model. Just call <code>predict.abess()</code> function with the <code>support.size</code> set to the size of model you are interested in. If a <code>support.size</code> is not provided, prediction will be made on the model with best tuning value.</p>
+<pre class="r"><code>head(predict(abess_fit, newx = dat$x, support.size = c(3, 4)))</code></pre>
+<pre><code>##              3         4
+## [1,]  1.838255  1.954873
+## [2,]  2.650749  2.692234
+## [3,]  3.080214  3.088154
+## [4,] -1.098251 -1.302053
+## [5,] -2.200394 -2.211221
+## [6,]  4.107201  4.103329</code></pre>
+<p>The <code>plot.abess()</code> function helps to visualize the change of models with the change of support size. There are 5 types of graph you can generate, including <code>coef</code> for the coefficient value, <code>l2norm</code> for the L2-norm of the coefficients, <code>dev</code> for the deviance and <code>tune</code> for the tuning value. Default if <code>coef</code>.</p>
+<pre class="r"><code>plot(abess_fit, label = TRUE)</code></pre>
+<p><img src="v04-PoissonGammaReg_files/figure-html/unnamed-chunk-5-1.png" /><!-- --></p>
+<p>The graph shows that, beginning from the most dense model, the 3th variable (job) is included in the active set until the support size reaches 0.</p>
+<p>We can also generate a graph about the tuning value. Remember that we used the default GIC to tune the support size.</p>
+<pre class="r"><code>plot(abess_fit, type = &quot;tune&quot;)</code></pre>
+<p><img src="v04-PoissonGammaReg_files/figure-html/unnamed-chunk-6-1.png" /><!-- --></p>
+<p>The tuning value reaches the lowest point at 3. And We might choose the estimated model with support size equals 6 as our final model. In fact, the tuning values of different model sizes are provided in <code>tune.value</code> of the <code>abess</code> object. You can get the best model size through the following call.</p>
+<pre class="r"><code>abess_fit$support.size[which.min(abess_fit$tune.value)]</code></pre>
+<pre><code>## [1] 3</code></pre>
+<p>To extract any model from the <code>abess</code> object, we can call the <code>extract()</code> function with a given <code>support.size</code>. If <code>support.size</code> is not provided, the model with the best tuning value will be returned. Here we extract the model with support size equals to 3.</p>
+<pre class="r"><code>best.model = extract(abess_fit, support.size = 3)
+str(best.model)</code></pre>
+<pre><code>## List of 7
+##  $ beta        :Formal class &#39;dgCMatrix&#39; [package &quot;Matrix&quot;] with 6 slots
+##   .. ..@ i       : int [1:3] 2 3 4
+##   .. ..@ p       : int [1:2] 0 3
+##   .. ..@ Dim     : int [1:2] 6 1
+##   .. ..@ Dimnames:List of 2
+##   .. .. ..$ : chr [1:6] &quot;age&quot; &quot;sex&quot; &quot;job&quot; &quot;education&quot; ...
+##   .. .. ..$ : chr &quot;3&quot;
+##   .. ..@ x       : num [1:3] 1.335 0.748 0.677
+##   .. ..@ factors : list()
+##  $ intercept   : num -0.105
+##  $ support.size: num 3
+##  $ support.vars: chr [1:3] &quot;job&quot; &quot;education&quot; &quot;region&quot;
+##  $ support.beta: num [1:3] 1.335 0.748 0.677
+##  $ dev         : num -1012
+##  $ tune.value  : num -2016</code></pre>
+<pre class="r"><code>best.model$beta</code></pre>
+<pre><code>## 6 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##                   3
+## age       .        
+## sex       .        
+## job       1.3352379
+## education 0.7481296
+## region    0.6772817
+## marriage  .</code></pre>
+<p>The return is a list containing the basic information of the estimated model. The best model has estimated coefficients every close to the true coefficients and it successfully recovers the correct support.</p>
+</div>
+<div id="gamma-regression" class="section level2">
+<h2>Gamma Regression</h2>
+<p>Gamma regression can be used when you have positive continuous response variables such as payments for insurance claims, or the lifetime of a redundant system. It is well known that the density of Gamma distribution can be represented as a function of a mean parameter (<span class="math inline">\(\mu\)</span>) and a shape parameter (<span class="math inline">\(\alpha\)</span>), specifically, <span class="math display">\[
+f(y \mid \mu, \alpha)=\frac{1}{y \Gamma(\alpha)}\left(\frac{\alpha y}{\mu}\right)^{\alpha} e^{-\alpha y / \mu} {I}_{(0, \infty)}(y),
+\]</span> where <span class="math inline">\(I(\cdot)\)</span> denotes the indicator function. In the Gamma regression model, response variables are assumed to follow Gamma distributions. Specifically, <span class="math display">\[
+y_i \sim Gamma(\mu_i, \alpha),
+\]</span> where <span class="math inline">\(1/\mu_i = x_i^T\beta\)</span>.</p>
+<p>We apply the above procedure for gamma regression simply by changing <code>family = "poisson"</code> to <code>family = "gamma"</code>. This time we consider the response variables as (continuous) levels of satisfaction. Also, instead of GIC, we carry out cross validation to tune the support size by setting <code>tune.type = "cv"</code> in <code>abess</code>.</p>
+<pre class="r"><code># generate data
+dat &lt;- generate.data(n = 100, p = 6, support.size = 3, family = &quot;gamma&quot;)
+colnames(dat$x) &lt;- c(&quot;age&quot;, &quot;sex&quot;, &quot;job&quot;, 
+                     &quot;education&quot;, &quot;region&quot;, &quot;marriage&quot;)
+dat$beta</code></pre>
+<pre><code>## [1]  0.00000  0.00000 80.37275 66.66677 64.02925  0.00000</code></pre>
+<pre class="r"><code>head(dat$x)</code></pre>
+<pre><code>##             age         sex        job  education     region    marriage
+## [1,] -0.6264538 -0.62036668  0.4094018  0.8936737  1.0744410  0.07730312
+## [2,]  0.1836433  0.04211587  1.6888733 -1.0472981  1.8956548 -0.29686864
+## [3,] -0.8356286 -0.91092165  1.5865884  1.9713374 -0.6029973 -1.18324224
+## [4,]  1.5952808  0.15802877 -0.3309078 -0.3836321 -0.3908678  0.01129269
+## [5,]  0.3295078 -0.65458464 -2.2852355  1.6541453 -0.4162220  0.99160104
+## [6,] -0.8204684  1.76728727  2.4976616  1.5122127 -0.3756574  1.59396745</code></pre>
+<pre class="r"><code>complain &lt;- data.frame(&#39;count&#39;=dat$y, dat$x)
+
+abess_fit &lt;- abess(count~., complain, family = &quot;gamma&quot;, tune.type =&quot;cv&quot;)
+
+# draw the estimated coefficients on all candidate support size
+coef(abess_fit)</code></pre>
+<pre><code>## 7 x 7 sparse Matrix of class &quot;dgCMatrix&quot;
+##                    0        1         2         3         4         5
+## (intercept) 342.3786 433.5399 449.07955 453.59162 454.62486 456.86280
+## age           .        .        .         .         .       -12.73044
+## sex           .        .        .         .       -17.05833 -15.30942
+## job           .        .      104.53483  83.99608  85.32251  87.43632
+## education     .        .        .        72.05160  71.94211  71.31821
+## region        .      132.5486  73.37383  55.16201  58.87711  61.05067
+## marriage      .        .        .         .         .         .      
+##                       6
+## (intercept) 456.9214598
+## age         -12.6859059
+## sex         -15.1305799
+## job          87.4267021
+## education    71.2965875
+## region       61.0173033
+## marriage      0.8783947</code></pre>
+<pre class="r"><code># get the deviance of the estimated model on all candidate support size
+deviance(abess_fit)</code></pre>
+<pre><code>## [1] -4.835917 -4.979948 -5.041090 -5.058884 -5.059648 -5.060127 -5.060129</code></pre>
+<pre class="r"><code># print the fitted model
+print(abess_fit)</code></pre>
+<pre><code>## Call:
+## abess.formula(formula = count ~ ., data = complain, family = &quot;gamma&quot;, 
+##     tune.type = &quot;cv&quot;)
+## 
+##   support.size       dev        cv
+## 1            0 -4.835917 -4.782249
+## 2            1 -4.979948 -4.879505
+## 3            2 -5.041090 -5.009830
+## 4            3 -5.058884 -4.568354
+## 5            4 -5.059648 -4.568300
+## 6            5 -5.060127 -4.569411
+## 7            6 -5.060129 -4.569221</code></pre>
+<pre class="r"><code># predict results for given support sizes
+head(predict(abess_fit, newx = dat$x, support.size = c(3, 4)))</code></pre>
+<pre><code>##             3        4
+## [1,] 611.6387 627.6912
+## [2,] 624.5590 634.2712
+## [3,] 695.6343 711.8548
+## [4,] 376.5943 373.0828
+## [5,] 357.8650 365.3057
+## [6,] 751.6207 724.2588</code></pre>
+<pre class="r"><code>plot(abess_fit, label = TRUE)</code></pre>
+<p><img src="v04-PoissonGammaReg_files/figure-html/unnamed-chunk-9-1.png" /><!-- --></p>
+<pre class="r"><code># tuning plot
+plot(abess_fit, type = &quot;tune&quot;)</code></pre>
+<p><img src="v04-PoissonGammaReg_files/figure-html/unnamed-chunk-9-2.png" /><!-- --></p>
+<pre class="r"><code># extract fitted model
+best.model = extract(abess_fit, support.size = 3)
+str(best.model)</code></pre>
+<pre><code>## List of 7
+##  $ beta        :Formal class &#39;dgCMatrix&#39; [package &quot;Matrix&quot;] with 6 slots
+##   .. ..@ i       : int [1:3] 2 3 4
+##   .. ..@ p       : int [1:2] 0 3
+##   .. ..@ Dim     : int [1:2] 6 1
+##   .. ..@ Dimnames:List of 2
+##   .. .. ..$ : chr [1:6] &quot;age&quot; &quot;sex&quot; &quot;job&quot; &quot;education&quot; ...
+##   .. .. ..$ : chr &quot;3&quot;
+##   .. ..@ x       : num [1:3] 84 72.1 55.2
+##   .. ..@ factors : list()
+##  $ intercept   : num 454
+##  $ support.size: num 3
+##  $ support.vars: chr [1:3] &quot;job&quot; &quot;education&quot; &quot;region&quot;
+##  $ support.beta: num [1:3] 84 72.1 55.2
+##  $ dev         : num -5.06
+##  $ tune.value  : num -4.57</code></pre>
+<pre class="r"><code># estimated coefficients
+best.model$beta</code></pre>
+<pre><code>## 6 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##                  3
+## age        .      
+## sex        .      
+## job       83.99608
+## education 72.05160
+## region    55.16201
+## marriage   .</code></pre>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
