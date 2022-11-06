@@ -168,42 +168,78 @@ pre code {
 
 
 
-<h1 class="title toc-ignore">Quick start for <code>abess</code>: Linear regression</h1>
+<h1 class="title toc-ignore">Quick start for <code>abess</code>: Linear
+regression</h1>
 <h4 class="author">Jin Zhu</h4>
 
 </div>
 
 <div id="TOC">
 <ul>
-<li><a href="#brief-introduction">Brief introduction</a></li>
-<li><a href="#quick-example">Quick example</a>
+<li><a href="#brief-introduction" id="toc-brief-introduction">Brief
+introduction</a></li>
+<li><a href="#quick-example" id="toc-quick-example">Quick example</a>
 <ul>
-<li><a href="#fixed-support-size-best-subset-selection">Fixed support size best subset selection</a></li>
-<li><a href="#adaptive-best-subset-selection">Adaptive best subset selection</a></li>
+<li><a href="#fixed-support-size-best-subset-selection"
+id="toc-fixed-support-size-best-subset-selection">Fixed support size
+best subset selection</a></li>
+<li><a href="#adaptive-best-subset-selection"
+id="toc-adaptive-best-subset-selection">Adaptive best subset
+selection</a></li>
 </ul></li>
-<li><a href="#real-data-example">Real data example</a>
+<li><a href="#real-data-example" id="toc-real-data-example">Real data
+example</a>
 <ul>
-<li><a href="#hitters-dataset">Hitters Dataset</a></li>
-<li><a href="#running-abess">Running ABESS</a></li>
-<li><a href="#interpret-the-result">Interpret the Result</a></li>
+<li><a href="#hitters-dataset" id="toc-hitters-dataset">Hitters
+Dataset</a></li>
+<li><a href="#running-abess" id="toc-running-abess">Running
+ABESS</a></li>
+<li><a href="#interpret-the-result"
+id="toc-interpret-the-result">Interpret the Result</a></li>
 </ul></li>
-<li><a href="#advanced-features">Advanced features</a>
+<li><a href="#advanced-features" id="toc-advanced-features">Advanced
+features</a>
 <ul>
-<li><a href="#feature-screening-for-ultra-high-dimensional-dataset">Feature screening for ultra-high dimensional dataset</a></li>
-<li><a href="#more-features">More features</a></li>
+<li><a href="#feature-screening-for-ultra-high-dimensional-dataset"
+id="toc-feature-screening-for-ultra-high-dimensional-dataset">Feature
+screening for ultra-high dimensional dataset</a></li>
+<li><a href="#more-features" id="toc-more-features">More
+features</a></li>
 </ul></li>
 </ul>
 </div>
 
 <div id="brief-introduction" class="section level2">
 <h2>Brief introduction</h2>
-<p>The R package <code>abess</code> implement a polynomial algorithm <a href="https://www.pnas.org/doi/10.1073/pnas.2014241117"></a> for solving the best-subset selection problem: <span class="math display">\[\min_{\boldsymbol{\beta} \in \mathbb{R}^p} \mathcal{L_n}({\boldsymbol\beta}), \text{ s.t. } \|\boldsymbol\beta\|_0 \leq s,\]</span> where <span class="math inline">\(\mathcal{L}_{n}(\boldsymbol \beta)=\frac{1}{2 n}\|y-X \boldsymbol{\beta}\|_{2}^{2}\)</span>, <span class="math inline">\(\|\boldsymbol{\beta}\|_0=\sum_{i=1}^pI( \boldsymbol{\beta}_i\neq 0)\)</span> is the <span class="math inline">\(\ell_0\)</span>(-pseudo) norm of <span class="math inline">\(\beta\)</span>, and the sparsity level <span class="math inline">\(s\)</span> is usually an unknown non-negative integer. Next, we present an example to show how to use the <code>abess</code> package to solve a simple problem.</p>
+<p>The R package <code>abess</code> implement a polynomial algorithm <a
+href="https://www.pnas.org/doi/10.1073/pnas.2014241117"></a> for solving
+the best-subset selection problem: <span
+class="math display">\[\min_{\boldsymbol{\beta} \in \mathbb{R}^p}
+\mathcal{L_n}({\boldsymbol\beta}), \text{ s.t. } \|\boldsymbol\beta\|_0
+\leq s,\]</span> where <span
+class="math inline">\(\mathcal{L}_{n}(\boldsymbol \beta)=\frac{1}{2
+n}\|y-X \boldsymbol{\beta}\|_{2}^{2}\)</span>, <span
+class="math inline">\(\|\boldsymbol{\beta}\|_0=\sum_{i=1}^pI(
+\boldsymbol{\beta}_i\neq 0)\)</span> is the <span
+class="math inline">\(\ell_0\)</span>(-pseudo) norm of <span
+class="math inline">\(\beta\)</span>, and the sparsity level <span
+class="math inline">\(s\)</span> is usually an unknown non-negative
+integer. Next, we present an example to show how to use the
+<code>abess</code> package to solve a simple problem.</p>
 </div>
 <div id="quick-example" class="section level2">
 <h2>Quick example</h2>
-<div id="fixed-support-size-best-subset-selection" class="section level3">
+<div id="fixed-support-size-best-subset-selection"
+class="section level3">
 <h3>Fixed support size best subset selection</h3>
-<p>We generate a design matrix <span class="math inline">\(X\)</span> containing 300 observations and each observation has 1000 predictors. The response variable <span class="math inline">\(y\)</span> is linearly related to the first, second, and fifth predictors in <span class="math inline">\(X\)</span>: <span class="math display">\[y = 3X_1 + 1.5X_2 + 2X_5 + \epsilon,\]</span> where <span class="math inline">\(\varepsilon\)</span> is a standard normal random variable.</p>
+<p>We generate a design matrix <span class="math inline">\(X\)</span>
+containing 300 observations and each observation has 1000 predictors.
+The response variable <span class="math inline">\(y\)</span> is linearly
+related to the first, second, and fifth predictors in <span
+class="math inline">\(X\)</span>: <span class="math display">\[y = 3X_1
++ 1.5X_2 + 2X_5 + \epsilon,\]</span> where <span
+class="math inline">\(\varepsilon\)</span> is a standard normal random
+variable.</p>
 <pre class="r"><code>library(abess)
 synthetic_data &lt;- generate.data(n = 300, p = 1000, 
                                 beta = c(3, 1.5, 0, 0, 2, rep(0, 995)))
@@ -219,9 +255,17 @@ dim(synthetic_data[[&quot;x&quot;]])</code></pre>
 ## [6,]  4.470901</code></pre>
 <pre class="r"><code>dat &lt;- cbind.data.frame(&quot;y&quot; = synthetic_data[[&quot;y&quot;]], 
                         synthetic_data[[&quot;x&quot;]])</code></pre>
-<p>Then, we use the main function <code>abess</code> in the package to fit this dataset. By setting the arguments <code>support.size = s</code>, <code>abess()</code> function conducts <strong>Algorithm 1</strong> <a href="https://www.pnas.org/doi/10.1073/pnas.2014241117"></a> for the best-subset selection with a sparsity level <code>s</code>. In our example, we set the options: <code>support.size = 3</code>, and we run <strong>Algorithm 1</strong> with the following command:</p>
+<p>Then, we use the main function <code>abess</code> in the package to
+fit this dataset. By setting the arguments
+<code>support.size = s</code>, <code>abess()</code> function conducts
+<strong>Algorithm 1</strong> <a
+href="https://www.pnas.org/doi/10.1073/pnas.2014241117"></a> for the
+best-subset selection with a sparsity level <code>s</code>. In our
+example, we set the options: <code>support.size = 3</code>, and we run
+<strong>Algorithm 1</strong> with the following command:</p>
 <pre class="r"><code>abess_fit &lt;- abess(y ~ ., data = dat, support.size = 3)</code></pre>
-<p>The output of <code>abess</code> comprises the selected best model:</p>
+<p>The output of <code>abess</code> comprises the selected best
+model:</p>
 <pre class="r"><code>head(coef(abess_fit, sparse = FALSE))</code></pre>
 <pre><code>##                       3
 ## (intercept) -0.01802179
@@ -230,7 +274,9 @@ dim(synthetic_data[[&quot;x&quot;]])</code></pre>
 ## x3           0.00000000
 ## x4           0.00000000
 ## x5           1.90592036</code></pre>
-<p>The support set of the best model is identical to the ground truth, and the coefficient estimation is the same as the oracle estimator given by <code>lm</code> function:</p>
+<p>The support set of the best model is identical to the ground truth,
+and the coefficient estimation is the same as the oracle estimator given
+by <code>lm</code> function:</p>
 <pre class="r"><code>lm(y ~ ., data = dat[, c(1, c(1, 2, 5) + 1)])</code></pre>
 <pre><code>## 
 ## Call:
@@ -243,9 +289,15 @@ dim(synthetic_data[[&quot;x&quot;]])</code></pre>
 </div>
 <div id="adaptive-best-subset-selection" class="section level3">
 <h3>Adaptive best subset selection</h3>
-<p>Supposing we are unknown about the true sparsity level in real world data, and thus, we need to determine the most proper one. The <strong>Algorithm 3</strong> <a href="https://www.pnas.org/doi/10.1073/pnas.2014241117"></a> is designed for this scenario. <code>abess</code> is capable of performing this algorithm:</p>
+<p>Supposing we are unknown about the true sparsity level in real world
+data, and thus, we need to determine the most proper one. The
+<strong>Algorithm 3</strong> <a
+href="https://www.pnas.org/doi/10.1073/pnas.2014241117"></a> is designed
+for this scenario. <code>abess</code> is capable of performing this
+algorithm:</p>
 <pre class="r"><code>abess_fit &lt;- abess(y ~ ., data = dat)</code></pre>
-<p>The output of <code>abess()</code> also comprises the selected best model:</p>
+<p>The output of <code>abess()</code> also comprises the selected best
+model:</p>
 <pre class="r"><code>best_size &lt;- abess_fit[[&quot;best.size&quot;]]
 print(best_size)</code></pre>
 <pre><code>## [1] 3</code></pre>
@@ -257,14 +309,21 @@ print(best_size)</code></pre>
 ## x3           0.00000000
 ## x4           0.00000000
 ## x5           1.90592036</code></pre>
-<p>The output model accurately detect the true model size, which implies the <strong>Algorithm 3</strong> efficiently find both the optimal sparsity level and true effective predictors.</p>
+<p>The output model accurately detect the true model size, which implies
+the <strong>Algorithm 3</strong> efficiently find both the optimal
+sparsity level and true effective predictors.</p>
 </div>
 </div>
 <div id="real-data-example" class="section level2">
 <h2>Real data example</h2>
 <div id="hitters-dataset" class="section level3">
 <h3>Hitters Dataset</h3>
-<p>In this tutorial, we are going to demonstrate how to use the <code>abess</code> package to carry out best subset selection on the <code>Hitters</code> dataset. We hope to use several predictors related to the performance of the baseball athletes last year to predict their salary. First, let’s have a look at this dataset. There are 19 variables except <code>Salary</code> and 322 observations.</p>
+<p>In this tutorial, we are going to demonstrate how to use the
+<code>abess</code> package to carry out best subset selection on the
+<code>Hitters</code> dataset. We hope to use several predictors related
+to the performance of the baseball athletes last year to predict their
+salary. First, let’s have a look at this dataset. There are 19 variables
+except <code>Salary</code> and 322 observations.</p>
 <pre class="r"><code>Hitters &lt;- read.csv(&quot;Hitters.csv&quot;, header = TRUE)
 head(Hitters)</code></pre>
 <pre><code>##   AtBat Hits HmRun Runs RBI Walks Years CAtBat CHits CHmRun CRuns CRBI CWalks
@@ -285,19 +344,28 @@ head(Hitters)</code></pre>
 <pre><code>## [1] 322  20</code></pre>
 <pre class="r"><code>sum(is.na(Hitters))</code></pre>
 <pre><code>## [1] 59</code></pre>
-<p>Note that this dataset contains some missing data. So we use the <code>na.omit()</code> function to delete rows that have incomplete information. After that, we have 263 observations remaining.</p>
+<p>Note that this dataset contains some missing data. So we use the
+<code>na.omit()</code> function to delete rows that have incomplete
+information. After that, we have 263 observations remaining.</p>
 <pre class="r"><code>Hitters &lt;- na.omit(Hitters)
 dim(Hitters)</code></pre>
 <pre><code>## [1] 263  20</code></pre>
 <pre class="r"><code>sum(is.na(Hitters))</code></pre>
 <pre><code>## [1] 0</code></pre>
-<p>Then we change the factors into dummy variables with the <code>model.matrix()</code> function. Note that the <code>abess()</code> function will automatically include the intercept.</p>
+<p>Then we change the factors into dummy variables with the
+<code>model.matrix()</code> function. Note that the <code>abess()</code>
+function will automatically include the intercept.</p>
 <pre class="r"><code>Hitters &lt;- model.matrix(~., Hitters)[, -1]
 Hitters &lt;- as.data.frame(Hitters)</code></pre>
 </div>
 <div id="running-abess" class="section level3">
 <h3>Running ABESS</h3>
-<p>The <code>abess()</code> function in the <code>abess</code> package allows you to perform best subset selection in a highly efficient way. You can call the <code>abess()</code> function using formula just like what you do with <code>lm()</code>. Or you can specify the design matrix <code>x</code> and the response <code>y</code>. The <code>system.time()</code> function records the run time.</p>
+<p>The <code>abess()</code> function in the <code>abess</code> package
+allows you to perform best subset selection in a highly efficient way.
+You can call the <code>abess()</code> function using formula just like
+what you do with <code>lm()</code>. Or you can specify the design matrix
+<code>x</code> and the response <code>y</code>. The
+<code>system.time()</code> function records the run time.</p>
 <pre class="r"><code>library(abess)
 abess_fit &lt;- abess(Salary ~ ., Hitters)
 abess_fit &lt;- abess(Hitters[, -which(colnames(Hitters) == &quot;Salary&quot;)], Hitters$Salary)
@@ -306,7 +374,11 @@ class(abess_fit)</code></pre>
 </div>
 <div id="interpret-the-result" class="section level3">
 <h3>Interpret the Result</h3>
-<p>After get the estimator, we can further do more exploring work. The output of <code>abess()</code> function contains the best model for all the candidate support size in the <code>support.size</code>. You can use some generic function to quickly draw some information of those estimators.</p>
+<p>After get the estimator, we can further do more exploring work. The
+output of <code>abess()</code> function contains the best model for all
+the candidate support size in the <code>support.size</code>. You can use
+some generic function to quickly draw some information of those
+estimators.</p>
 <pre class="r"><code># draw the estimated coefficients on all candidate support size
 coef(abess_fit)</code></pre>
 <pre><code>## 20 x 20 sparse Matrix of class &quot;dgCMatrix&quot;
@@ -426,7 +498,11 @@ print(abess_fit)</code></pre>
 ## 18           17  46032.63 2909.843
 ## 19           18  46016.41 2914.808
 ## 20           19  46008.93 2919.824</code></pre>
-<p>Prediction is allowed for all the estimated models. Just call <code>predict.abess()</code> function with the <code>support.size</code> set to the size of model you are interested in. If <code>support.size</code> is not provided, prediction will be made on the model with best tuning value.</p>
+<p>Prediction is allowed for all the estimated models. Just call
+<code>predict.abess()</code> function with the <code>support.size</code>
+set to the size of model you are interested in. If
+<code>support.size</code> is not provided, prediction will be made on
+the model with best tuning value.</p>
 <pre class="r"><code>hitters_pred &lt;- predict(abess_fit, 
                         newx = Hitters[, -which(colnames(Hitters) == &quot;Salary&quot;)], 
                         support.size = c(3, 4))
@@ -438,17 +514,36 @@ head(hitters_pred)</code></pre>
 ## 5 424.10211  498.2470
 ## 6 708.86493  632.3839
 ## 7  59.21692  139.8497</code></pre>
-<p>The <code>plot.abess()</code> function helps to visualize the change of models with the change of support size. There are 5 types of graph you can generate, including <code>coef</code> for the coefficient value, <code>l2norm</code> for the L2-norm of the coefficients, <code>dev</code> for the deviance and <code>tune</code> for the tuning value. Default if <code>coef</code>.</p>
+<p>The <code>plot.abess()</code> function helps to visualize the change
+of models with the change of support size. There are 5 types of graph
+you can generate, including <code>coef</code> for the coefficient value,
+<code>l2norm</code> for the L2-norm of the coefficients,
+<code>dev</code> for the deviance and <code>tune</code> for the tuning
+value. Default if <code>coef</code>.</p>
 <pre class="r"><code>plot(abess_fit, label = TRUE)</code></pre>
-<p><img src="v01-abess-guide_files/figure-html/unnamed-chunk-14-1.png" /><!-- --></p>
-<p>The graph shows that, beginning from the most dense model, the 15th variable (Division, A factor with levels E and W indicating player’s division at the end of 1986) is included in the active set until the support size reaches 3.</p>
-<p>We can also generate a graph about the tuning value. Remember that we used the default GIC to tune the support size.</p>
+<p><img
+src="v01-abess-guide_files/figure-html/unnamed-chunk-14-1.png" /><!-- --></p>
+<p>The graph shows that, beginning from the most dense model, the 15th
+variable (Division, A factor with levels E and W indicating player’s
+division at the end of 1986) is included in the active set until the
+support size reaches 3.</p>
+<p>We can also generate a graph about the tuning value. Remember that we
+used the default GIC to tune the support size.</p>
 <pre class="r"><code>plot(abess_fit, type = &quot;tune&quot;)</code></pre>
-<p><img src="v01-abess-guide_files/figure-html/unnamed-chunk-15-1.png" /><!-- --></p>
-<p>The tuning value reaches the lowest point at 6. And We might choose the estimated model with support size equals 6 as our final model. In fact, the tuning values of different model sizes are provided in <code>tune.value</code> of the <code>abess</code> object. You can get the best model size through the following call.</p>
+<p><img
+src="v01-abess-guide_files/figure-html/unnamed-chunk-15-1.png" /><!-- --></p>
+<p>The tuning value reaches the lowest point at 6. And We might choose
+the estimated model with support size equals 6 as our final model. In
+fact, the tuning values of different model sizes are provided in
+<code>tune.value</code> of the <code>abess</code> object. You can get
+the best model size through the following call.</p>
 <pre class="r"><code>extract(abess_fit)[[&quot;support.size&quot;]]</code></pre>
 <pre><code>## [1] 6</code></pre>
-<p>To extract any model from the <code>abess</code> object, we can call the <code>extract()</code> function with a given <code>support.size</code>. If <code>support.size</code> is not provided, the model with the best tuning value will be returned. Here we extract the model with support size equals 6.</p>
+<p>To extract any model from the <code>abess</code> object, we can call
+the <code>extract()</code> function with a given
+<code>support.size</code>. If <code>support.size</code> is not provided,
+the model with the best tuning value will be returned. Here we extract
+the model with support size equals 6.</p>
 <pre class="r"><code>best.model &lt;- extract(abess_fit, support.size = 6)
 str(best.model)</code></pre>
 <pre><code>## List of 7
@@ -467,14 +562,35 @@ str(best.model)</code></pre>
 ##  $ support.beta: num [1:6] -1.869 7.604 3.698 0.643 -122.952 ...
 ##  $ dev         : num 49800
 ##  $ tune.value  : num 2875</code></pre>
-<p>The return is a list containing the basic information of the estimated model.</p>
+<p>The return is a list containing the basic information of the
+estimated model.</p>
 </div>
 </div>
 <div id="advanced-features" class="section level2">
 <h2>Advanced features</h2>
-<div id="feature-screening-for-ultra-high-dimensional-dataset" class="section level3">
+<div id="feature-screening-for-ultra-high-dimensional-dataset"
+class="section level3">
 <h3>Feature screening for ultra-high dimensional dataset</h3>
-<p>The <a href="https://archive.ics.uci.edu/ml/datasets/communities+and+crime"></a> consists of 18 variables about crime from the 1995 FBI UCR (e.g., per capita arson crimes and per capita violent crimes), communities information in the U.S. (e.g., the percent of the population considered urban), socio-economic data from the 90s census (e.g., the median family income), and law enforcement data from the 1990 law enforcement management and admin stats survey (e.g., per capita number of police officers). It would be appropriate if any of the crime state in community can be modeled by the basic community information, socio-economic and law enforcement state in community. Here, without the loss of generality, per capita violent crimes is chosen as the response variable, and 102 numerical variables as well as their pairwise interactions is considered as predictors. <!-- Note that, the numerical variables with at least 50\% percentages missing observations are excluded,  --> <!-- and 200 observations without missing records are randomly picked out from the pool.  --> The pre-processed dataset for statistical modeling has 200 observations and 5253 predictors, and the code for pre-processing are openly shared in <a href="https://github.com/abess-team/abess/blob/master/R-package/data-raw/DATASET_VIGNETTES.R"></a>.<br />
+<p>The <a
+href="https://archive.ics.uci.edu/ml/datasets/communities+and+crime"></a>
+consists of 18 variables about crime from the 1995 FBI UCR (e.g., per
+capita arson crimes and per capita violent crimes), communities
+information in the U.S. (e.g., the percent of the population considered
+urban), socio-economic data from the 90s census (e.g., the median family
+income), and law enforcement data from the 1990 law enforcement
+management and admin stats survey (e.g., per capita number of police
+officers). It would be appropriate if any of the crime state in
+community can be modeled by the basic community information,
+socio-economic and law enforcement state in community. Here, without the
+loss of generality, per capita violent crimes is chosen as the response
+variable, and 102 numerical variables as well as their pairwise
+interactions is considered as predictors.
+<!-- Note that, the numerical variables with at least 50\% percentages missing observations are excluded,  -->
+<!-- and 200 observations without missing records are randomly picked out from the pool.  -->
+The pre-processed dataset for statistical modeling has 200 observations
+and 5253 predictors, and the code for pre-processing are openly shared
+in <a
+href="https://github.com/abess-team/abess/blob/master/R-package/data-raw/DATASET_VIGNETTES.R"></a>.<br />
 The pre-processed dataset can be freely downloaded by running:</p>
 <pre class="r"><code>working_directory &lt;- getwd()
 if (file.exists(&quot;crime.rda&quot;)) {
@@ -484,10 +600,14 @@ if (file.exists(&quot;crime.rda&quot;)) {
   download.file(crime_data_url, &quot;crime.rda&quot;)
   load(file.path(working_directory, &quot;crime.rda&quot;))
 }</code></pre>
-<p>As mentioned before, this dataset comprises 5000+ features, much larger than the number of observations:</p>
+<p>As mentioned before, this dataset comprises 5000+ features, much
+larger than the number of observations:</p>
 <pre class="r"><code>dim(crime)</code></pre>
 <pre><code>## [1]  500 5254</code></pre>
-<p>And thus, it would be better to first perform feature screening, which is also supported by the <code>abess</code> function. Suppose we are interested in retaining 1000 variables with the largest marginal utility, then we can conduct the command:</p>
+<p>And thus, it would be better to first perform feature screening,
+which is also supported by the <code>abess</code> function. Suppose we
+are interested in retaining 1000 variables with the largest marginal
+utility, then we can conduct the command:</p>
 <pre class="r"><code>abess_fit &lt;- abess(y ~ ., data = crime, screening.num = 1000)
 str(abess_fit)</code></pre>
 <pre><code>## List of 14
@@ -514,11 +634,14 @@ str(abess_fit)</code></pre>
 ##  $ screening.vars: chr [1:1000] &quot;pctBlack&quot; &quot;pctWhite&quot; &quot;medIncome&quot; &quot;pctWdiv&quot; ...
 ##  $ call          : language abess.formula(formula = y ~ ., data = crime, screening.num = 1000)
 ##  - attr(*, &quot;class&quot;)= chr &quot;abess&quot;</code></pre>
-<p>The returned object of <code>abess</code> includes the features selected by screening. We exhibit six variables of them:</p>
+<p>The returned object of <code>abess</code> includes the features
+selected by screening. We exhibit six variables of them:</p>
 <pre class="r"><code>head(abess_fit[[&quot;screening.vars&quot;]])</code></pre>
 <pre><code>## [1] &quot;pctBlack&quot;     &quot;pctWhite&quot;     &quot;medIncome&quot;    &quot;pctWdiv&quot;      &quot;pctPubAsst&quot;  
 ## [6] &quot;medFamIncome&quot;</code></pre>
-<p>Then, by the generic <code>extract</code> function, we can obtain the best model detected by <code>ABESS</code> algorithm, and get the variables in the best model:</p>
+<p>Then, by the generic <code>extract</code> function, we can obtain the
+best model detected by <code>ABESS</code> algorithm, and get the
+variables in the best model:</p>
 <pre class="r"><code>best_model &lt;- extract(abess_fit)
 str(best_model)</code></pre>
 <pre><code>## List of 7
@@ -555,7 +678,9 @@ best_vars</code></pre>
 </div>
 <div id="more-features" class="section level3">
 <h3>More features</h3>
-<p>There are plenty features provided by <code>abess</code> packages such as logistic regression and group selection. Please the other articles in our website for more details.</p>
+<p>There are plenty features provided by <code>abess</code> packages
+such as logistic regression and group selection. Please the other
+articles in our website for more details.</p>
 </div>
 </div>
 
