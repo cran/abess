@@ -212,8 +212,8 @@ features</a></li>
 <div id="brief-introduction" class="section level2">
 <h2>Brief introduction</h2>
 <p>The R package <code>abess</code> implement a polynomial algorithm <a
-href="https://www.pnas.org/doi/10.1073/pnas.2014241117"></a> for solving
-the best-subset selection problem: <span
+href="https://doi.org/10.1073/pnas.2014241117"></a> for solving the
+best-subset selection problem: <span
 class="math display">\[\min_{\boldsymbol{\beta} \in \mathbb{R}^p}
 \mathcal{L_n}({\boldsymbol\beta}), \text{ s.t. } \|\boldsymbol\beta\|_0
 \leq s,\]</span> where <span
@@ -259,10 +259,10 @@ dim(synthetic_data[[&quot;x&quot;]])</code></pre>
 fit this dataset. By setting the arguments
 <code>support.size = s</code>, <code>abess()</code> function conducts
 <strong>Algorithm 1</strong> <a
-href="https://www.pnas.org/doi/10.1073/pnas.2014241117"></a> for the
-best-subset selection with a sparsity level <code>s</code>. In our
-example, we set the options: <code>support.size = 3</code>, and we run
-<strong>Algorithm 1</strong> with the following command:</p>
+href="https://doi.org/10.1073/pnas.2014241117"></a> for the best-subset
+selection with a sparsity level <code>s</code>. In our example, we set
+the options: <code>support.size = 3</code>, and we run <strong>Algorithm
+1</strong> with the following command:</p>
 <pre class="r"><code>abess_fit &lt;- abess(y ~ ., data = dat, support.size = 3)</code></pre>
 <p>The output of <code>abess</code> comprises the selected best
 model:</p>
@@ -292,8 +292,8 @@ by <code>lm</code> function:</p>
 <p>Supposing we are unknown about the true sparsity level in real world
 data, and thus, we need to determine the most proper one. The
 <strong>Algorithm 3</strong> <a
-href="https://www.pnas.org/doi/10.1073/pnas.2014241117"></a> is designed
-for this scenario. <code>abess</code> is capable of performing this
+href="https://doi.org/10.1073/pnas.2014241117"></a> is designed for this
+scenario. <code>abess</code> is capable of performing this
 algorithm:</p>
 <pre class="r"><code>abess_fit &lt;- abess(y ~ ., data = dat)</code></pre>
 <p>The output of <code>abess()</code> also comprises the selected best
