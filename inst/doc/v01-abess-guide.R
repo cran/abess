@@ -1,5 +1,6 @@
 ## ---- echo=FALSE, message=FALSE, warning=FALSE--------------------------------
 knitr::opts_chunk$set(warning = FALSE, eval = TRUE, message = FALSE)
+Sys.setenv("OMP_THREAD_LIMIT" = 2)
 
 ## -----------------------------------------------------------------------------
 library(abess)

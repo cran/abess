@@ -76,6 +76,11 @@ abess <- function(x, ...) UseMethod("abess")
 #' \code{normalize = 3} for scaling the columns of \code{x} to have \eqn{\sqrt n} norm.
 #' If \code{normalize = NULL}, \code{normalize} will be set \code{1} for \code{"gaussian"} and \code{"mgaussian"},
 #' \code{3} for \code{"cox"}. Default is \code{normalize = NULL}.
+#' @param fit.intercept A boolean value indicating whether to fit an intercept. 
+#' We assume the data has been centered if \code{fit.intercept = FALSE}.
+#' Default: \code{fit.intercept = FALSE}.
+#' @param beta.low A single value specifying the lower bound of \eqn{\beta}. Default is \code{-.Machine$double.xmax}.
+#' @param beta.high A single value specifying the upper bound of \eqn{\beta}. Default is \code{.Machine$double.xmax}.
 #' @param c.max an integer splicing size. Default is: \code{c.max = 2}.
 #' @param weight Observation weights. When \code{weight = NULL},
 #' we set \code{weight = 1} for each observation as default.
@@ -197,6 +202,7 @@ abess <- function(x, ...) UseMethod("abess")
 #' @examples
 #' \donttest{
 #' library(abess)
+#' Sys.setenv("OMP_THREAD_LIMIT" = 2)
 #' n <- 100
 #' p <- 20
 #' support.size <- 3
@@ -303,6 +309,9 @@ abess.default <- function(x,
                           tune.type = c("gic", "ebic", "bic", "aic", "cv"),
                           weight = NULL,
                           normalize = NULL,
+                          fit.intercept = TRUE,
+                          beta.low = -.Machine$double.xmax,
+                          beta.high = .Machine$double.xmax,
                           c.max = 2,
                           support.size = NULL,
                           gs.range = NULL,
@@ -352,10 +361,13 @@ abess.default <- function(x,
     tune.path=tune.path,
     max.newton.iter=max.newton.iter,
     lambda=lambda,
+    beta.low=beta.low,
+    beta.high=beta.high,
     family=family,
     screening.num=screening.num,
     gs.range=gs.range,
     early.stop=early.stop,
+    fit.intercept=fit.intercept,
     weight=weight,
     cov.update=cov.update,
     normalize=normalize,
@@ -373,6 +385,8 @@ abess.default <- function(x,
   x <- data$x
   tune.path <- para$tune.path
   lambda <- para$lambda
+  beta_low <- para$beta_low
+  beta_high <- para$beta_high
   family <- para$family
   gs.range <- para$gs.range
   weight <- para$weight
@@ -410,6 +424,7 @@ abess.default <- function(x,
   y_dim <- para$y_dim
   multi_y <- para$multi_y
   early_stop <- para$early_stop
+  fit_intercept <- para$fit_intercept
   
   result <- abessGLM_API(
     x = x,
@@ -447,7 +462,10 @@ abess.default <- function(x,
     splicing_type = splicing_type,
     sub_search = important_search,
     cv_fold_id = cv_fold_id, 
-    A_init = as.integer(init.active.set)
+    A_init = as.integer(init.active.set),
+    fit_intercept = fit_intercept,
+    beta_low = beta_low,
+    beta_high = beta_high
   )
 
   ## process result
@@ -539,7 +557,7 @@ abess.default <- function(x,
       )
     } else if (family %in% c("multinomial", "ordinal")) {
       result[["beta"]] <- lapply(result[["beta"]], function(x) {
-        Matrix::Matrix(x[, -y_dim], sparse = TRUE, dimnames = list(vn, y_vn[-1]))
+        Matrix::Matrix(x[, -y_dim,drop=FALSE], sparse = TRUE, dimnames = list(vn, y_vn[-1]))
       })
     }
   } else {
