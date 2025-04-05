@@ -11,6 +11,35 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// sample_by_conf
+Eigen::MatrixXd sample_by_conf(long long n, Eigen::MatrixXd theta, int seed);
+RcppExport SEXP _abess_sample_by_conf(SEXP nSEXP, SEXP thetaSEXP, SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< long long >::type n(nSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type theta(thetaSEXP);
+    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(sample_by_conf(n, theta, seed));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Ising_Gibbs
+Eigen::MatrixXd Ising_Gibbs(Eigen::MatrixXd theta, int n_sample, int burn, int skip, Eigen::VectorXd value, int seed);
+RcppExport SEXP _abess_Ising_Gibbs(SEXP thetaSEXP, SEXP n_sampleSEXP, SEXP burnSEXP, SEXP skipSEXP, SEXP valueSEXP, SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type theta(thetaSEXP);
+    Rcpp::traits::input_parameter< int >::type n_sample(n_sampleSEXP);
+    Rcpp::traits::input_parameter< int >::type burn(burnSEXP);
+    Rcpp::traits::input_parameter< int >::type skip(skipSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type value(valueSEXP);
+    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(Ising_Gibbs(theta, n_sample, burn, skip, value, seed));
+    return rcpp_result_gen;
+END_RCPP
+}
 // abessGLM_API
 List abessGLM_API(Eigen::MatrixXd x, Eigen::MatrixXd y, int n, int p, int normalize_type, Eigen::VectorXd weight, int algorithm_type, int model_type, int max_iter, int exchange_num, int path_type, bool is_warm_start, int ic_type, double ic_coef, int Kfold, Eigen::VectorXi sequence, Eigen::VectorXd lambda_seq, int s_min, int s_max, double lambda_min, double lambda_max, int nlambda, int screening_size, Eigen::VectorXi g_index, Eigen::VectorXi always_select, int primary_model_fit_max_iter, double primary_model_fit_epsilon, bool early_stop, bool approximate_Newton, int thread, bool covariance_update, bool sparse_matrix, int splicing_type, int sub_search, Eigen::VectorXi cv_fold_id, Eigen::VectorXi A_init, bool fit_intercept, double beta_low, double beta_high);
 RcppExport SEXP _abess_abessGLM_API(SEXP xSEXP, SEXP ySEXP, SEXP nSEXP, SEXP pSEXP, SEXP normalize_typeSEXP, SEXP weightSEXP, SEXP algorithm_typeSEXP, SEXP model_typeSEXP, SEXP max_iterSEXP, SEXP exchange_numSEXP, SEXP path_typeSEXP, SEXP is_warm_startSEXP, SEXP ic_typeSEXP, SEXP ic_coefSEXP, SEXP KfoldSEXP, SEXP sequenceSEXP, SEXP lambda_seqSEXP, SEXP s_minSEXP, SEXP s_maxSEXP, SEXP lambda_minSEXP, SEXP lambda_maxSEXP, SEXP nlambdaSEXP, SEXP screening_sizeSEXP, SEXP g_indexSEXP, SEXP always_selectSEXP, SEXP primary_model_fit_max_iterSEXP, SEXP primary_model_fit_epsilonSEXP, SEXP early_stopSEXP, SEXP approximate_NewtonSEXP, SEXP threadSEXP, SEXP covariance_updateSEXP, SEXP sparse_matrixSEXP, SEXP splicing_typeSEXP, SEXP sub_searchSEXP, SEXP cv_fold_idSEXP, SEXP A_initSEXP, SEXP fit_interceptSEXP, SEXP beta_lowSEXP, SEXP beta_highSEXP) {
@@ -136,6 +165,8 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_abess_sample_by_conf", (DL_FUNC) &_abess_sample_by_conf, 3},
+    {"_abess_Ising_Gibbs", (DL_FUNC) &_abess_Ising_Gibbs, 6},
     {"_abess_abessGLM_API", (DL_FUNC) &_abess_abessGLM_API, 39},
     {"_abess_abessPCA_API", (DL_FUNC) &_abess_abessPCA_API, 27},
     {"_abess_abessRPCA_API", (DL_FUNC) &_abess_abessRPCA_API, 27},
